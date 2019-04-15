@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	w := providers.Whittard{}
-	for _, v := range w.ListJobs() {
-		log.Println(v)
+	p := providers.Netflix{}
+	for _, v := range p.ListJobs() {
+		log.Println(v.Title)
 	}
 }

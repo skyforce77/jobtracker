@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-type Whittard struct {}
+type Whittard struct{}
 
 func (whittard *Whittard) requestJob(url string) (*Job, error) {
 	res, err := http.Get(url)
@@ -28,7 +28,7 @@ func (whittard *Whittard) requestJob(url string) (*Job, error) {
 		job.Title = s.Text()
 	})
 	doc.Find(".position_description .jobs-row-input p").Each(func(i int, s *goquery.Selection) {
-		job.Desc = s.Text()
+		job.Desc += s.Text()
 	})
 	doc.Find(".position_employment_type .jobs-row-input").Each(func(i int, s *goquery.Selection) {
 		job.Type = s.Text()
