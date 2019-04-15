@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	p := providers.Netflix{}
+	p := providers.Disney{}
 	for _, v := range p.ListJobs() {
-		log.Println(v.Title)
+		log.Println(v.Title, v.Company)
 	}
 }

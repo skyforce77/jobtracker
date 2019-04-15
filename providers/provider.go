@@ -11,6 +11,7 @@ const (
 
 type Job struct {
 	Title    string
+	Company  string
 	Location string
 	Type     string
 	Desc     string

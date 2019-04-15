@@ -21,7 +21,8 @@ func (whittard *Whittard) requestJob(url string) (*Job, error) {
 	}
 
 	job := Job{
-		Link: url,
+		Link:    url,
+		Company: "Whittard",
 	}
 
 	doc.Find(".position_title .jobs-row-input").Each(func(i int, s *goquery.Selection) {

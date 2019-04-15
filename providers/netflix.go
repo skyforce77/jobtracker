@@ -10,28 +10,28 @@ import (
 
 type Netflix struct{}
 
-type NetflixPostingsInfo struct {
+type netflixPostingsInfo struct {
 	Pages int `json:"num_pages"`
 }
 
-type NetflixInfo struct {
-	PostingsInfo NetflixPostingsInfo `json:"postings"`
+type netflixInfo struct {
+	PostingsInfo netflixPostingsInfo `json:"postings"`
 }
 
-type NetflixPosting struct {
+type netflixPosting struct {
 	Title    string `json:"text"`
 	Desc     string `json:"description"`
 	Location string `json:"location"`
 	Url      string `json:"url"`
 }
 
-type NetflixRecords struct {
-	Postings []NetflixPosting `json:"postings"`
+type netflixRecords struct {
+	Postings []netflixPosting `json:"postings"`
 }
 
-type NetflixSearch struct {
-	Info    NetflixInfo    `json:"info"`
-	Records NetflixRecords `json:"records"`
+type netflixSearch struct {
+	Info    netflixInfo    `json:"info"`
+	Records netflixRecords `json:"records"`
 }
 
 func (netflix *Netflix) readPage(url string) ([]*Job, error) {
@@ -50,7 +50,7 @@ func (netflix *Netflix) readPage(url string) ([]*Job, error) {
 		log.Fatal(err)
 	}
 
-	search := NetflixSearch{}
+	search := netflixSearch{}
 	err = json.Unmarshal(body, &search)
 	if err != nil {
 		log.Fatal(err)
@@ -60,11 +60,12 @@ func (netflix *Netflix) readPage(url string) ([]*Job, error) {
 
 	for _, p := range search.Records.Postings {
 		jobs = append(jobs, &Job{
-			Title: p.Title,
+			Title:    p.Title,
+			Company:  "Netflix",
 			Location: p.Location,
-			Type: string(FullTime),
-			Desc: p.Desc,
-			Link: p.Url,
+			Type:     string(FullTime),
+			Desc:     p.Desc,
+			Link:     p.Url,
 		})
 	}
 
@@ -89,13 +90,13 @@ func (netflix *Netflix) ListJobs() []*Job {
 		log.Fatal(err)
 	}
 
-	search := NetflixSearch{}
+	search := netflixSearch{}
 	err = json.Unmarshal(body, &search)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for i:=1; i<=search.Info.PostingsInfo.Pages; i++ {
+	for i := 1; i <= search.Info.PostingsInfo.Pages; i++ {
 		j, err := netflix.readPage(fmt.Sprintf("https://jobs.netflix.com/api/search?page=%d", i))
 		if err != nil {
 			log.Fatal(err)
