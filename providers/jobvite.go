@@ -56,6 +56,7 @@ func (jobvite *jobVite) RetrieveJobs(fn func(job *Job)) {
 
 		s.Children().Each(func(i int, s *goquery.Selection) {
 			if i == 0 {
+				job.Title = s.Children().First().Text()
 				url, ok := s.Children().First().Attr("href")
 				if !ok {
 					log.Fatal(err)
