@@ -7,9 +7,7 @@ import (
 
 func main() {
 	p := providers.Netflix{}
-	lst := p.ListJobs()
-
-	providers.IterateOver(lst, func(job *providers.Job) {
+	p.RetrieveJobs(func(job *providers.Job) {
 		log.Println(job.Title, job.Company)
 	})
 }

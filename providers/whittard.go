@@ -1,7 +1,6 @@
 package providers
 
 import (
-	"container/list"
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"net/http"
@@ -9,16 +8,16 @@ import (
 
 type Whittard struct{}
 
-func (whittard *Whittard) requestJob(url string) (*Job, error) {
+func (whittard *Whittard) requestJob(url string, fn func(job *Job)) {
 	res, err := http.Get(url)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 	defer res.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 
 	job := Job{
@@ -39,12 +38,10 @@ func (whittard *Whittard) requestJob(url string) (*Job, error) {
 		job.Location = s.Text()
 	})
 
-	return &job, nil
+	fn(&job)
 }
 
-func (whittard *Whittard) ListJobs() *list.List {
-	jobs := list.New()
-
+func (whittard *Whittard) RetrieveJobs(fn func(job *Job)) {
 	res, err := http.Get("https://careers.whittard.co.uk/contact/")
 	if err != nil {
 		log.Fatal(err)
@@ -66,13 +63,6 @@ func (whittard *Whittard) ListJobs() *list.List {
 			log.Fatal(err)
 		}
 
-		job, err := whittard.requestJob(url)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		jobs.PushBack(job)
+		whittard.requestJob(url, fn)
 	})
-
-	return jobs
 }

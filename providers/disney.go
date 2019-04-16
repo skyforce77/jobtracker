@@ -1,7 +1,6 @@
 package providers
 
 import (
-	"container/list"
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -20,16 +19,16 @@ type disneySearch struct {
 
 const disneyUrl = "https://jobs.disneycareers.com/search-jobs/results?ActiveFacetID=0&CurrentPage=%d&RecordsPerPage=15&Distance=50&RadiusUnitType=0&Keywords=&Location=&Latitude=&Longitude=&ShowRadius=False&CustomFacetName=&FacetTerm=&FacetType=0&SearchResultsModuleName=Search+Results&SearchFiltersModuleName=Search+Filters&SortCriteria=0&SortDirection=1&SearchType=5&CategoryFacetTerm=&CategoryFacetType=&LocationFacetTerm=&LocationFacetType=&KeywordType=&LocationType=&LocationPath=&OrganizationIds=&PostalCode=&fc=&fl=&fcf=&afc=&afl=&afcf="
 
-func (disney *Disney) requestJob(url string) (*Job, error) {
+func (disney *Disney) requestJob(url string, fn func(job *Job)) {
 	res, err := http.Get(url)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 	defer res.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 
 	job := Job{
@@ -50,12 +49,10 @@ func (disney *Disney) requestJob(url string) (*Job, error) {
 		job.Location = s.Text()
 	})
 
-	return &job, nil
+	fn(&job)
 }
 
-func (disney *Disney) readPage(page int, search *disneySearch) *list.List {
-	jobs := list.New()
-
+func (disney *Disney) readPage(page int, search *disneySearch, fn func(job *Job)) {
 	res, err := http.Get(fmt.Sprintf(disneyUrl, page))
 	if err != nil {
 		log.Fatal(err)
@@ -89,20 +86,12 @@ func (disney *Disney) readPage(page int, search *disneySearch) *list.List {
 		}
 
 		if strings.HasPrefix(url, "/job/") {
-			j, err := disney.requestJob("https://jobs.disneycareers.com" + url)
-			if err != nil {
-				log.Fatal(err)
-			}
-			jobs.PushBack(j)
+			disney.requestJob("https://jobs.disneycareers.com"+url, fn)
 		}
 	})
-
-	return jobs
 }
 
-func (disney *Disney) ListJobs() *list.List {
-	jobs := list.New()
-
+func (disney *Disney) RetrieveJobs(fn func(job *Job)) {
 	search := &disneySearch{
 		"",
 		true,
@@ -112,9 +101,6 @@ func (disney *Disney) ListJobs() *list.List {
 	for search.HasJobs {
 		i++
 
-		j := disney.readPage(i, search)
-		jobs.PushBackList(j)
+		disney.readPage(i, search, fn)
 	}
-
-	return jobs
 }

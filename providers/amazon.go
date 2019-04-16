@@ -1,7 +1,6 @@
 package providers
 
 import (
-	"container/list"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -42,9 +41,7 @@ type amazonPage struct {
 	} `json:"jobs"`
 }
 
-func (amazon *Amazon) ListJobs() *list.List {
-	jobs := list.New()
-
+func (amazon *Amazon) RetrieveJobs(fn func(job *Job)) {
 	offset := 0
 	hits := 1
 	for offset < hits {
@@ -73,7 +70,7 @@ func (amazon *Amazon) ListJobs() *list.List {
 
 		hits = search.Hits
 		for _, job := range search.Jobs {
-			jobs.PushBack(&Job{
+			fn(&Job{
 				Title:    job.Title,
 				Company:  job.CompanyName,
 				Location: job.NormalizedLocation,
@@ -86,6 +83,4 @@ func (amazon *Amazon) ListJobs() *list.List {
 		offset += len(search.Jobs)
 		res.Body.Close()
 	}
-
-	return jobs
 }

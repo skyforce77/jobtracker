@@ -1,7 +1,6 @@
 package providers
 
 import (
-	"container/list"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -143,10 +142,10 @@ type netflixSearch struct {
 	} `json:"errors"`
 }
 
-func (netflix *Netflix) readPage(url string) (*list.List, error) {
+func (netflix *Netflix) readPage(url string, fn func(job *Job)) {
 	res, err := http.Get(url)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 	defer res.Body.Close()
 
@@ -165,10 +164,8 @@ func (netflix *Netflix) readPage(url string) (*list.List, error) {
 		log.Fatal(err)
 	}
 
-	jobs := list.New()
-
 	for _, job := range search.Records.Postings {
-		jobs.PushBack(&Job{
+		fn(&Job{
 			Title:    job.Text,
 			Company:  "Netflix",
 			Location: job.Location,
@@ -177,13 +174,9 @@ func (netflix *Netflix) readPage(url string) (*list.List, error) {
 			Link:     job.URL,
 		})
 	}
-
-	return jobs, nil
 }
 
-func (netflix *Netflix) ListJobs() *list.List {
-	jobs := list.New()
-
+func (netflix *Netflix) RetrieveJobs(fn func(job *Job)) {
 	res, err := http.Get("https://jobs.netflix.com/api/search")
 	if err != nil {
 		log.Fatal(err)
@@ -206,13 +199,6 @@ func (netflix *Netflix) ListJobs() *list.List {
 	}
 
 	for i := 1; i <= search.Info.Postings.NumPages; i++ {
-		j, err := netflix.readPage(fmt.Sprintf("https://jobs.netflix.com/api/search?page=%d", i))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		jobs.PushBackList(j)
+		netflix.readPage(fmt.Sprintf("https://jobs.netflix.com/api/search?page=%d", i), fn)
 	}
-
-	return jobs
 }
