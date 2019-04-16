@@ -1,7 +1,13 @@
 package providers
 
 type adobe struct {
-	myWorkdayJobs
+	experienced myWorkdayJobs
+	university myWorkdayJobs
+}
+
+func (adobe *adobe) RetrieveJobs(fn func(job *Job)) {
+	adobe.experienced.RetrieveJobs(fn)
+	adobe.university.RetrieveJobs(fn)
 }
 
 func NewAdobe() *adobe {
@@ -10,6 +16,11 @@ func NewAdobe() *adobe {
 			"Adobe",
 			"https://adobe.wd5.myworkdayjobs.com",
 			"/external_experienced",
+		},
+		myWorkdayJobs{
+			"Adobe",
+			"https://adobe.wd5.myworkdayjobs.com",
+			"/external_university",
 		},
 	}
 }
