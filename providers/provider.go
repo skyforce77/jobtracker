@@ -16,13 +16,13 @@ const (
 )
 
 type Job struct {
-	Title    string
-	Company  string
-	Location string
-	Type     string
-	Desc     string
-	Link     string
-	Misc     map[string]string
+	Title    string            `json:"title"`
+	Company  string            `json:"company"`
+	Location string            `json:"location"`
+	Type     string            `json:"type"`
+	Desc     string            `json:"description"`
+	Link     string            `json:"link"`
+	Misc     map[string]string `json:"misc"`
 }
 
 type Provider interface {

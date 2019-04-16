@@ -30,7 +30,7 @@ func (twitter *twitter) requestJob(url string, fn func(job *Job)) {
 	job := Job{
 		Link:    url,
 		Company: "Twitter",
-		Type: string(FullTime),
+		Type:    string(FullTime),
 	}
 
 	doc.Find("h1").First().Each(func(i int, s *goquery.Selection) {
@@ -50,7 +50,7 @@ func (twitter *twitter) requestJob(url string, fn func(job *Job)) {
 func (twitter *twitter) RetrieveJobs(fn func(job *Job)) {
 	i := 0
 	ni := -1
-	for ni != i{
+	for ni != i {
 		ni = i
 
 		res, err := http.Get(twitterUrl + fmt.Sprintf("&start=%d", i))
@@ -74,7 +74,7 @@ func (twitter *twitter) RetrieveJobs(fn func(job *Job)) {
 			}
 
 			i++
-			twitter.requestJob("https://careers.twitter.com" + url, fn)
+			twitter.requestJob("https://careers.twitter.com"+url, fn)
 		})
 
 		res.Body.Close()

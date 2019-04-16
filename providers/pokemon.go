@@ -29,7 +29,7 @@ func (pokemon *pokemon) requestJob(url string, fn func(job *Job)) {
 	job := Job{
 		Link:    url,
 		Company: "Pokémon",
-		Type: string(FullTime),
+		Type:    string(FullTime),
 	}
 
 	doc.Find("table tbody tr td h1").First().Each(func(i int, s *goquery.Selection) {

@@ -6,9 +6,9 @@ import (
 	"net/http"
 )
 
-type jobVite struct{
+type jobVite struct {
 	company string
-	url string
+	url     string
 }
 
 func (jobvite *jobVite) requestJob(job *Job, fn func(job *Job)) {
@@ -51,7 +51,7 @@ func (jobvite *jobVite) RetrieveJobs(fn func(job *Job)) {
 	doc.Find(".jv-job-list tbody tr").Each(func(j int, s *goquery.Selection) {
 		job := Job{
 			Company: jobvite.company,
-			Type: string(FullTime),
+			Type:    string(FullTime),
 		}
 
 		s.Children().Each(func(i int, s *goquery.Selection) {
@@ -80,8 +80,8 @@ func (jobvite *jobVite) RetrieveJobs(fn func(job *Job)) {
 
 		job := Job{
 			Company: jobvite.company,
-			Type: string(FullTime),
-			Link: "https://jobs.jobvite.com" + url,
+			Type:    string(FullTime),
+			Link:    "https://jobs.jobvite.com" + url,
 		}
 
 		s.Children().Each(func(i int, s *goquery.Selection) {
