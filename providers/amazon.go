@@ -66,6 +66,9 @@ func (amazon *Amazon) ListJobs() []*Job {
 		if err != nil {
 			log.Fatal(err)
 		}
+		if search.Error != nil {
+			log.Fatal(search.Error)
+		}
 
 		hits = search.Hits
 		tmp := make([]*Job, len(search.Jobs))
