@@ -10,7 +10,11 @@ import (
 	"strings"
 )
 
-type Disney struct{}
+type disney struct{}
+
+func NewDisney() *disney {
+	return &disney{}
+}
 
 type disneySearch struct {
 	Filters string `json:"results"`
@@ -19,7 +23,7 @@ type disneySearch struct {
 
 const disneyUrl = "https://jobs.disneycareers.com/search-jobs/results?ActiveFacetID=0&CurrentPage=%d&RecordsPerPage=15&Distance=50&RadiusUnitType=0&Keywords=&Location=&Latitude=&Longitude=&ShowRadius=False&CustomFacetName=&FacetTerm=&FacetType=0&SearchResultsModuleName=Search+Results&SearchFiltersModuleName=Search+Filters&SortCriteria=0&SortDirection=1&SearchType=5&CategoryFacetTerm=&CategoryFacetType=&LocationFacetTerm=&LocationFacetType=&KeywordType=&LocationType=&LocationPath=&OrganizationIds=&PostalCode=&fc=&fl=&fcf=&afc=&afl=&afcf="
 
-func (disney *Disney) requestJob(url string, fn func(job *Job)) {
+func (disney *disney) requestJob(url string, fn func(job *Job)) {
 	res, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -52,7 +56,7 @@ func (disney *Disney) requestJob(url string, fn func(job *Job)) {
 	fn(&job)
 }
 
-func (disney *Disney) readPage(page int, search *disneySearch, fn func(job *Job)) {
+func (disney *disney) readPage(page int, search *disneySearch, fn func(job *Job)) {
 	res, err := http.Get(fmt.Sprintf(disneyUrl, page))
 	if err != nil {
 		log.Fatal(err)
@@ -91,7 +95,7 @@ func (disney *Disney) readPage(page int, search *disneySearch, fn func(job *Job)
 	})
 }
 
-func (disney *Disney) RetrieveJobs(fn func(job *Job)) {
+func (disney *disney) RetrieveJobs(fn func(job *Job)) {
 	search := &disneySearch{
 		"",
 		true,

@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	p := providers.Netflix{}
+	p := providers.NewPaloAltoNetworks()
 	p.RetrieveJobs(func(job *providers.Job) {
 		log.Println(job.Title, job.Company)
 	})

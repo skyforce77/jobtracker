@@ -6,9 +6,13 @@ import (
 	"net/http"
 )
 
-type Whittard struct{}
+type whittard struct{}
 
-func (whittard *Whittard) requestJob(url string, fn func(job *Job)) {
+func NewWhittard() *whittard {
+	return &whittard{}
+}
+
+func (whittard *whittard) requestJob(url string, fn func(job *Job)) {
 	res, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -41,7 +45,7 @@ func (whittard *Whittard) requestJob(url string, fn func(job *Job)) {
 	fn(&job)
 }
 
-func (whittard *Whittard) RetrieveJobs(fn func(job *Job)) {
+func (whittard *whittard) RetrieveJobs(fn func(job *Job)) {
 	res, err := http.Get("https://careers.whittard.co.uk/contact/")
 	if err != nil {
 		log.Fatal(err)

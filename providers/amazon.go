@@ -8,7 +8,11 @@ import (
 	"net/http"
 )
 
-type Amazon struct{}
+type amazon struct{}
+
+func NewAmazon() *amazon {
+	return &amazon{}
+}
 
 const amazonUrl = "https://www.amazon.jobs/fr/search.json?base_query=&city=&country=&county=&facets%5B%5D=location&facets%5B%5D=business_category&facets%5B%5D=category&facets%5B%5D=schedule_type_id&facets%5B%5D=employee_class&facets%5B%5D=normalized_location&facets%5B%5D=job_function_id&latitude=&loc_group_id=&loc_query=&longitude=&query_options=&radius=24km&region=&result_limit=200&sort=recent"
 
@@ -41,7 +45,7 @@ type amazonPage struct {
 	} `json:"jobs"`
 }
 
-func (amazon *Amazon) RetrieveJobs(fn func(job *Job)) {
+func (amazon *amazon) RetrieveJobs(fn func(job *Job)) {
 	offset := 0
 	hits := 1
 	for offset < hits {

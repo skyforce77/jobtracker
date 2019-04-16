@@ -9,7 +9,11 @@ import (
 	"time"
 )
 
-type Netflix struct{}
+type netflix struct{}
+
+func NewNetflix() *netflix {
+	return &netflix{}
+}
 
 type netflixSearch struct {
 	RecordCount int `json:"record_count"`
@@ -142,7 +146,7 @@ type netflixSearch struct {
 	} `json:"errors"`
 }
 
-func (netflix *Netflix) readPage(url string, fn func(job *Job)) {
+func (netflix *netflix) readPage(url string, fn func(job *Job)) {
 	res, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -176,7 +180,7 @@ func (netflix *Netflix) readPage(url string, fn func(job *Job)) {
 	}
 }
 
-func (netflix *Netflix) RetrieveJobs(fn func(job *Job)) {
+func (netflix *netflix) RetrieveJobs(fn func(job *Job)) {
 	res, err := http.Get("https://jobs.netflix.com/api/search")
 	if err != nil {
 		log.Fatal(err)
