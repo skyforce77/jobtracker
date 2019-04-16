@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"container/list"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -142,7 +143,7 @@ type netflixSearch struct {
 	} `json:"errors"`
 }
 
-func (netflix *Netflix) readPage(url string) ([]*Job, error) {
+func (netflix *Netflix) readPage(url string) (*list.List, error) {
 	res, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -164,10 +165,10 @@ func (netflix *Netflix) readPage(url string) ([]*Job, error) {
 		log.Fatal(err)
 	}
 
-	jobs := make([]*Job, 0)
+	jobs := list.New()
 
 	for _, job := range search.Records.Postings {
-		jobs = append(jobs, &Job{
+		jobs.PushBack(&Job{
 			Title:    job.Text,
 			Company:  "Netflix",
 			Location: job.Location,
@@ -180,8 +181,8 @@ func (netflix *Netflix) readPage(url string) ([]*Job, error) {
 	return jobs, nil
 }
 
-func (netflix *Netflix) ListJobs() []*Job {
-	jobs := make([]*Job, 0)
+func (netflix *Netflix) ListJobs() *list.List {
+	jobs := list.New()
 
 	res, err := http.Get("https://jobs.netflix.com/api/search")
 	if err != nil {
@@ -210,7 +211,7 @@ func (netflix *Netflix) ListJobs() []*Job {
 			log.Fatal(err)
 		}
 
-		jobs = append(jobs, j...)
+		jobs.PushBackList(j)
 	}
 
 	return jobs

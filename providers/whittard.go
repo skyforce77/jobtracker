@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"container/list"
 	"github.com/PuerkitoBio/goquery"
 	"log"
 	"net/http"
@@ -41,8 +42,8 @@ func (whittard *Whittard) requestJob(url string) (*Job, error) {
 	return &job, nil
 }
 
-func (whittard *Whittard) ListJobs() []*Job {
-	jobs := make([]*Job, 0)
+func (whittard *Whittard) ListJobs() *list.List {
+	jobs := list.New()
 
 	res, err := http.Get("https://careers.whittard.co.uk/contact/")
 	if err != nil {
@@ -70,7 +71,7 @@ func (whittard *Whittard) ListJobs() []*Job {
 			log.Fatal(err)
 		}
 
-		jobs = append(jobs, job)
+		jobs.PushBack(job)
 	})
 
 	return jobs

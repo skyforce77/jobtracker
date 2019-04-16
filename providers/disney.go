@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"container/list"
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -52,8 +53,8 @@ func (disney *Disney) requestJob(url string) (*Job, error) {
 	return &job, nil
 }
 
-func (disney *Disney) readPage(page int, search *disneySearch) []*Job {
-	jobs := make([]*Job, 0)
+func (disney *Disney) readPage(page int, search *disneySearch) *list.List {
+	jobs := list.New()
 
 	res, err := http.Get(fmt.Sprintf(disneyUrl, page))
 	if err != nil {
@@ -92,15 +93,15 @@ func (disney *Disney) readPage(page int, search *disneySearch) []*Job {
 			if err != nil {
 				log.Fatal(err)
 			}
-			jobs = append(jobs, j)
+			jobs.PushBack(j)
 		}
 	})
 
 	return jobs
 }
 
-func (disney *Disney) ListJobs() []*Job {
-	jobs := make([]*Job, 0)
+func (disney *Disney) ListJobs() *list.List {
+	jobs := list.New()
 
 	search := &disneySearch{
 		"",
@@ -112,7 +113,7 @@ func (disney *Disney) ListJobs() []*Job {
 		i++
 
 		j := disney.readPage(i, search)
-		jobs = append(jobs, j...)
+		jobs.PushBackList(j)
 	}
 
 	return jobs

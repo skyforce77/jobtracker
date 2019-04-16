@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"container/list"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -41,8 +42,8 @@ type amazonPage struct {
 	} `json:"jobs"`
 }
 
-func (amazon *Amazon) ListJobs() []*Job {
-	jobs := make([]*Job, 0)
+func (amazon *Amazon) ListJobs() *list.List {
+	jobs := list.New()
 
 	offset := 0
 	hits := 1
@@ -71,18 +72,16 @@ func (amazon *Amazon) ListJobs() []*Job {
 		}
 
 		hits = search.Hits
-		tmp := make([]*Job, len(search.Jobs))
-		for i, job := range search.Jobs {
-			tmp[i] = &Job{
+		for _, job := range search.Jobs {
+			jobs.PushBack(&Job{
 				Title:    job.Title,
 				Company:  job.CompanyName,
 				Location: job.NormalizedLocation,
 				Type:     job.JobScheduleType,
 				Desc:     job.Description,
 				Link:     "https://www.amazon.jobs" + job.JobPath,
-			}
+			})
 		}
-		jobs = append(jobs, tmp...)
 
 		offset += len(search.Jobs)
 		res.Body.Close()

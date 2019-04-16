@@ -6,8 +6,10 @@ import (
 )
 
 func main() {
-	p := providers.Disney{}
-	for _, v := range p.ListJobs() {
-		log.Println(v.Title, v.Company)
-	}
+	p := providers.Netflix{}
+	lst := p.ListJobs()
+
+	providers.IterateOver(lst, func(job *providers.Job) {
+		log.Println(job.Title, job.Company)
+	})
 }
