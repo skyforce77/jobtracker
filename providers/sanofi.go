@@ -1,7 +1,13 @@
 package providers
 
 type sanofi struct {
-	myWorkdayJobs
+	students    myWorkdayJobs
+	experienced myWorkdayJobs
+}
+
+func (sanofi *sanofi) RetrieveJobs(fn func(job *Job)) {
+	sanofi.experienced.RetrieveJobs(fn)
+	sanofi.students.RetrieveJobs(fn)
 }
 
 func NewSanofi() *sanofi {
@@ -10,6 +16,10 @@ func NewSanofi() *sanofi {
 			"Sanofi",
 			"https://sanofi.wd3.myworkdayjobs.com",
 			"/StudentPrograms",
+		}, myWorkdayJobs{
+			"Sanofi",
+			"https://sanofi.wd3.myworkdayjobs.com",
+			"/SanofiCareers",
 		},
 	}
 }

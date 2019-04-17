@@ -2,7 +2,7 @@ package providers
 
 type adobe struct {
 	experienced myWorkdayJobs
-	university myWorkdayJobs
+	university  myWorkdayJobs
 }
 
 func (adobe *adobe) RetrieveJobs(fn func(job *Job)) {
