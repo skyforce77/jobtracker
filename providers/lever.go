@@ -13,6 +13,13 @@ type lever struct {
 	slug    string
 }
 
+func NewLever() *lever {
+	return &lever{
+			"Lever",
+			"lever",
+		}
+}
+
 type leverSearch []struct {
 	Title    string `json:"title"`
 	Postings []struct {
