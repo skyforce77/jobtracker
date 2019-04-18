@@ -15,6 +15,63 @@ const (
 	Apprenticeship JobType = "Apprenticeship"
 )
 
+var (
+	providers = []Provider{
+		New3M(),
+		NewAdobe(),
+		NewAmazon(),
+		NewBabylist(),
+		NewBetclic(),
+		NewBlizzard(),
+		NewCarta(),
+		NewConfluent(),
+		NewCoursera(),
+		NewDell(),
+		NewDisney(),
+		NewDoctrine(),
+		NewDukeEnergy(),
+		NewERM(),
+		NewEventBrite(),
+		NewFico(),
+		NewFlextronics(),
+		NewGamestop(),
+		NewGumGum(),
+		NewHottopic(),
+		NewJourny(),
+		NewKering(),
+		NewKickStarter(),
+		NewLever(),
+		NewLogitech(),
+		NewMastercard(),
+		NewMedium(),
+		NewNetflix(),
+		NewNpmjs(),
+		NewUniversityOfNevadaReno(),
+		NewNYTimes(),
+		NewOath(),
+		NewOutreach(),
+		NewPaloAltoNetworks(),
+		NewPokemon(),
+		NewRollsRoyce(),
+		NewRosettaStone(),
+		NewSalesforce(),
+		NewSamsung(),
+		NewSanofi(),
+		NewScribd(),
+		NewSoundcloud(),
+		NewStrait(),
+		NewThales(),
+		NewTrafigura(),
+		NewTrainline(),
+		NewTwitch(),
+		NewTwitter(),
+		NewUniversityOfChicago(),
+		NewVinted(),
+		NewWhittard(),
+		NewWorkday(),
+	}
+)
+
 type Job struct {
 	Title    string            `json:"title"`
 	Company  string            `json:"company"`
@@ -50,4 +107,8 @@ func RetrieveAsync(provider Provider, fn func(*Job)) {
 	provider.RetrieveJobs(func(job *Job) {
 		go fn(job)
 	})
+}
+
+func GetProviders() []Provider {
+	return providers
 }

@@ -15,9 +15,9 @@ type lever struct {
 
 func NewLever() *lever {
 	return &lever{
-			"Lever",
-			"lever",
-		}
+		"Lever",
+		"lever",
+	}
 }
 
 type leverSearch []struct {
