@@ -275,7 +275,11 @@ func (mwj *myWorkdayJobs) readPage(index int, mwjp *myWorkdayJobsPage, fn func(j
 							return err
 						}
 
-						job.Desc = page.Body.Children[1].Children[0].Children[2].Text
+						if len(page.Body.Children) >= 2 &&
+							len(page.Body.Children[1].Children) >= 1 &&
+							len(page.Body.Children[1].Children[0].Children) >= 3 {
+							job.Desc = page.Body.Children[1].Children[0].Children[2].Text
+						}
 						fn(&job)
 					}
 				}
