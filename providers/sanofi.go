@@ -5,9 +5,12 @@ type sanofi struct {
 	experienced myWorkdayJobs
 }
 
-func (sanofi *sanofi) RetrieveJobs(fn func(job *Job)) {
-	sanofi.experienced.RetrieveJobs(fn)
-	sanofi.students.RetrieveJobs(fn)
+func (sanofi *sanofi) RetrieveJobs(fn func(job *Job)) error {
+	err := sanofi.experienced.RetrieveJobs(fn)
+	if err != nil {
+		return err
+	}
+	return sanofi.students.RetrieveJobs(fn)
 }
 
 func NewSanofi() *sanofi {

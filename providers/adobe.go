@@ -5,9 +5,12 @@ type adobe struct {
 	university  myWorkdayJobs
 }
 
-func (adobe *adobe) RetrieveJobs(fn func(job *Job)) {
-	adobe.experienced.RetrieveJobs(fn)
-	adobe.university.RetrieveJobs(fn)
+func (adobe *adobe) RetrieveJobs(fn func(job *Job)) error {
+	err := adobe.experienced.RetrieveJobs(fn)
+	if err != nil {
+		return err
+	}
+	return adobe.university.RetrieveJobs(fn)
 }
 
 func NewAdobe() *adobe {

@@ -5,9 +5,12 @@ type samsung struct {
 	myWorkdayJobs myWorkdayJobs
 }
 
-func (samsung *samsung) RetrieveJobs(fn func(job *Job)) {
-	samsung.myWorkdayJobs.RetrieveJobs(fn)
-	samsung.jobVite.RetrieveJobs(fn)
+func (samsung *samsung) RetrieveJobs(fn func(job *Job)) error {
+	err := samsung.myWorkdayJobs.RetrieveJobs(fn)
+	if err != nil {
+		return err
+	}
+	return samsung.jobVite.RetrieveJobs(fn)
 }
 
 func NewSamsung() *samsung {

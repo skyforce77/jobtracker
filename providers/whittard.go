@@ -2,7 +2,6 @@ package providers
 
 import (
 	"github.com/PuerkitoBio/goquery"
-	"log"
 	"net/http"
 )
 
@@ -12,16 +11,16 @@ func NewWhittard() *whittard {
 	return &whittard{}
 }
 
-func (whittard *whittard) requestJob(url string, fn func(job *Job)) {
+func (whittard *whittard) requestJob(url string, fn func(job *Job)) error {
 	res, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer res.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	job := Job{
@@ -43,30 +42,32 @@ func (whittard *whittard) requestJob(url string, fn func(job *Job)) {
 	})
 
 	fn(&job)
+	return nil
 }
 
-func (whittard *whittard) RetrieveJobs(fn func(job *Job)) {
+func (whittard *whittard) RetrieveJobs(fn func(job *Job)) error {
 	res, err := http.Get("https://careers.whittard.co.uk/contact/")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+		return HandleStatus(res)
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	doc.Find(".job-cta a").Each(func(i int, s *goquery.Selection) {
 		url, ok := s.Attr("href")
 		if !ok {
-			log.Fatal(err)
+			return
 		}
 
-		whittard.requestJob(url, fn)
+		err = whittard.requestJob(url, fn)
 	})
+	return err
 }

@@ -2,11 +2,10 @@ package providers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -21,18 +20,18 @@ type disneySearch struct {
 	HasJobs bool   `json:"hasJobs"`
 }
 
-const disneyUrl = "https://jobs.disneycareers.com/search-jobs/results?ActiveFacetID=0&CurrentPage=%d&RecordsPerPage=15&Distance=50&RadiusUnitType=0&Keywords=&Location=&Latitude=&Longitude=&ShowRadius=False&CustomFacetName=&FacetTerm=&FacetType=0&SearchResultsModuleName=Search+Results&SearchFiltersModuleName=Search+Filters&SortCriteria=0&SortDirection=1&SearchType=5&CategoryFacetTerm=&CategoryFacetType=&LocationFacetTerm=&LocationFacetType=&KeywordType=&LocationType=&LocationPath=&OrganizationIds=&PostalCode=&fc=&fl=&fcf=&afc=&afl=&afcf="
+const disneyUrl = "https://jobs.disneycareers.com/search-jobs/results?ActiveFacetID=0&RecordsPerPage=15&Distance=50&RadiusUnitType=0&Keywords=&Location=&Latitude=&Longitude=&ShowRadius=False&CustomFacetName=&FacetTerm=&FacetType=0&SearchResultsModuleName=Search+Results&SearchFiltersModuleName=Search+Filters&SortCriteria=0&SortDirection=1&SearchType=5&CategoryFacetTerm=&CategoryFacetType=&LocationFacetTerm=&LocationFacetType=&KeywordType=&LocationType=&LocationPath=&OrganizationIds=&PostalCode=&fc=&fl=&fcf=&afc=&afl=&afcf=&CurrentPage="
 
-func (disney *disney) requestJob(url string, fn func(job *Job)) {
+func (disney *disney) requestJob(url string, fn func(job *Job)) error {
 	res, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer res.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	job := Job{
@@ -54,48 +53,50 @@ func (disney *disney) requestJob(url string, fn func(job *Job)) {
 	})
 
 	fn(&job)
+	return nil
 }
 
-func (disney *disney) readPage(page int, search *disneySearch, fn func(job *Job)) {
-	res, err := http.Get(fmt.Sprintf(disneyUrl, page))
+func (disney *disney) readPage(page int, search *disneySearch, fn func(job *Job)) error {
+	res, err := http.Get(disneyUrl + strconv.Itoa(page))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+		return HandleStatus(res)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = json.Unmarshal(body, search)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	rdr := strings.NewReader(search.Filters)
 	doc, err := goquery.NewDocumentFromReader(rdr)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	doc.Find("a").Each(func(i int, s *goquery.Selection) {
 		url, ok := s.Attr("href")
 		if !ok {
-			log.Fatal(err)
+			return
 		}
 
 		if strings.HasPrefix(url, "/job/") {
-			disney.requestJob("https://jobs.disneycareers.com"+url, fn)
+			err = disney.requestJob("https://jobs.disneycareers.com"+url, fn)
 		}
 	})
+	return err
 }
 
-func (disney *disney) RetrieveJobs(fn func(job *Job)) {
+func (disney *disney) RetrieveJobs(fn func(job *Job)) error {
 	search := &disneySearch{
 		"",
 		true,
@@ -105,6 +106,10 @@ func (disney *disney) RetrieveJobs(fn func(job *Job)) {
 	for search.HasJobs {
 		i++
 
-		disney.readPage(i, search, fn)
+		err := disney.readPage(i, search, fn)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }

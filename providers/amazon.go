@@ -2,10 +2,10 @@ package providers
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"strconv"
 )
 
 type amazon struct{}
@@ -45,31 +45,31 @@ type amazonPage struct {
 	} `json:"jobs"`
 }
 
-func (amazon *amazon) RetrieveJobs(fn func(job *Job)) {
+func (amazon *amazon) RetrieveJobs(fn func(job *Job)) error {
 	offset := 0
 	hits := 1
 	for offset < hits {
-		res, err := http.Get(amazonUrl + fmt.Sprintf("&offset=%d", offset))
+		res, err := http.Get(amazonUrl + "&offset=" + strconv.Itoa(offset))
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if res.StatusCode != 200 {
-			log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+			return HandleStatus(res)
 		}
 
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		search := amazonPage{}
 		err = json.Unmarshal(body, &search)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		if search.Error != nil {
-			log.Fatal(search.Error)
+			return errors.New("amazon err request")
 		}
 
 		hits = search.Hits
@@ -86,5 +86,6 @@ func (amazon *amazon) RetrieveJobs(fn func(job *Job)) {
 
 		offset += len(search.Jobs)
 		res.Body.Close()
+		return nil
 	}
 }

@@ -2,10 +2,10 @@ package providers
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/pkg/errors"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"strconv"
 )
 
 type lever struct {
@@ -45,24 +45,24 @@ type leverSearch []struct {
 	} `json:"postings"`
 }
 
-func (lever *lever) RetrieveJobs(fn func(job *Job)) {
-	res, err := http.Get(fmt.Sprintf("https://api.lever.co/v0/postings/%s?group=team&mode=json", lever.slug))
+func (lever *lever) RetrieveJobs(fn func(job *Job)) error {
+	res, err := http.Get("https://api.lever.co/v0/postings/" + lever.slug + "?group=team&mode=json")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+		return errors.New("status code error:" + strconv.Itoa(res.StatusCode) + " " + res.Status)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	search := leverSearch{}
 	err = json.Unmarshal(body, &search)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	for _, category := range search {
@@ -79,4 +79,5 @@ func (lever *lever) RetrieveJobs(fn func(job *Job)) {
 	}
 
 	res.Body.Close()
+	return nil
 }

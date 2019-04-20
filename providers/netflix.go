@@ -2,10 +2,9 @@ package providers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -146,26 +145,26 @@ type netflixSearch struct {
 	} `json:"errors"`
 }
 
-func (netflix *netflix) readPage(url string, fn func(job *Job)) {
+func (netflix *netflix) readPage(url string, fn func(job *Job)) error {
 	res, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+		return HandleStatus(res)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	search := netflixSearch{}
 	err = json.Unmarshal(body, &search)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	for _, job := range search.Records.Postings {
@@ -180,29 +179,33 @@ func (netflix *netflix) readPage(url string, fn func(job *Job)) {
 	}
 }
 
-func (netflix *netflix) RetrieveJobs(fn func(job *Job)) {
+func (netflix *netflix) RetrieveJobs(fn func(job *Job)) error {
 	res, err := http.Get("https://jobs.netflix.com/api/search")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+		return HandleStatus(res)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	search := netflixSearch{}
 	err = json.Unmarshal(body, &search)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	for i := 1; i <= search.Info.Postings.NumPages; i++ {
-		netflix.readPage(fmt.Sprintf("https://jobs.netflix.com/api/search?page=%d", i), fn)
+		err := netflix.readPage("https://jobs.netflix.com/api/search?page="+strconv.Itoa(i), fn)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }

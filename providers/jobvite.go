@@ -2,7 +2,6 @@ package providers
 
 import (
 	"github.com/PuerkitoBio/goquery"
-	"log"
 	"net/http"
 )
 
@@ -11,16 +10,16 @@ type jobVite struct {
 	url     string
 }
 
-func (jobvite *jobVite) requestJob(job *Job, fn func(job *Job)) {
+func (jobvite *jobVite) requestJob(job *Job, fn func(job *Job)) error {
 	res, err := http.Get(job.Link)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer res.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	doc.Find("h2.jv-header").First().Each(func(i int, s *goquery.Selection) {
@@ -33,19 +32,19 @@ func (jobvite *jobVite) requestJob(job *Job, fn func(job *Job)) {
 	fn(job)
 }
 
-func (jobvite *jobVite) RetrieveJobs(fn func(job *Job)) {
+func (jobvite *jobVite) RetrieveJobs(fn func(job *Job)) error {
 	res, err := http.Get(jobvite.url)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+		return HandleStatus(res)
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	doc.Find(".jv-job-list tbody tr").Each(func(j int, s *goquery.Selection) {
@@ -59,7 +58,7 @@ func (jobvite *jobVite) RetrieveJobs(fn func(job *Job)) {
 				job.Title = s.Children().First().Text()
 				url, ok := s.Children().First().Attr("href")
 				if !ok {
-					log.Fatal(err)
+					return
 				}
 
 				job.Link = "https://jobs.jobvite.com" + url
@@ -72,10 +71,9 @@ func (jobvite *jobVite) RetrieveJobs(fn func(job *Job)) {
 	})
 
 	doc.Find(".jv-job-list ul li a").Each(func(j int, s *goquery.Selection) {
-		log.Println(s.Text())
 		url, ok := s.Attr("href")
 		if !ok {
-			log.Fatal(err)
+			return
 		}
 
 		job := Job{
@@ -90,8 +88,12 @@ func (jobvite *jobVite) RetrieveJobs(fn func(job *Job)) {
 			}
 		})
 
-		jobvite.requestJob(&job, fn)
+		err = jobvite.requestJob(&job, fn)
+		if err != nil {
+			println(err)
+		}
 	})
 
 	res.Body.Close()
+	return nil
 }

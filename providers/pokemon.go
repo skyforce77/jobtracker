@@ -2,7 +2,6 @@ package providers
 
 import (
 	"github.com/PuerkitoBio/goquery"
-	"log"
 	"net/http"
 )
 
@@ -14,16 +13,16 @@ func NewPokemon() *pokemon {
 
 const pokemonUrl = "https://chj.tbe.taleo.net/chj04/ats/careers/searchResults.jsp?org=POKEMON&cws=1"
 
-func (pokemon *pokemon) requestJob(url string, fn func(job *Job)) {
+func (pokemon *pokemon) requestJob(url string, fn func(job *Job)) error {
 	res, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer res.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	job := Job{
@@ -45,30 +44,32 @@ func (pokemon *pokemon) requestJob(url string, fn func(job *Job)) {
 	})
 
 	fn(&job)
+	return nil
 }
 
-func (pokemon *pokemon) RetrieveJobs(fn func(job *Job)) {
+func (pokemon *pokemon) RetrieveJobs(fn func(job *Job)) error {
 	res, err := http.Get(pokemonUrl)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+		return HandleStatus(res)
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	doc.Find("#cws-search-results tbody tr td b a").Each(func(i int, s *goquery.Selection) {
 		url, ok := s.Attr("href")
 		if !ok {
-			log.Fatal(err)
+			return
 		}
 
-		pokemon.requestJob(url, fn)
+		err = pokemon.requestJob(url, fn)
 	})
+	return err
 }

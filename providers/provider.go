@@ -85,7 +85,7 @@ type Job struct {
 }
 
 type Provider interface {
-	RetrieveJobs(func(job *Job))
+	RetrieveJobs(func(job *Job)) error
 }
 
 func Collect(provider Provider) *list.List {

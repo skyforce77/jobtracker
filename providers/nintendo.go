@@ -3,7 +3,6 @@ package providers
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -25,37 +24,38 @@ type nintendoSearch []struct {
 	JobCreationDate           string `json:"JobCreationDate"`
 }
 
-func (nintendo *nintendo) RetrieveJobs(fn func(job *Job)) {
+func (nintendo *nintendo) RetrieveJobs(fn func(job *Job)) error {
 	res, err := http.Get("https://2oc84v7py6.execute-api.us-west-2.amazonaws.com/prod/api/jobs/")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+		return HandleStatus(res)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	search := nintendoSearch{}
 	err = json.Unmarshal(body, &search)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	for _, j := range search {
 		fn(&Job{
 			j.JobTitle,
 			"Nintendo",
-			j.JobPrimaryLocationCode+","+j.JobLocationState,
+			j.JobPrimaryLocationCode + "," + j.JobLocationState,
 			string(FullTime),
 			j.DescriptionExternalHTML,
-			"https://careers.nintendo.com/job-openings/listing/"+j.JobID+".html",
+			"https://careers.nintendo.com/job-openings/listing/" + j.JobID + ".html",
 			nil,
 		})
 	}
+	return nil
 }

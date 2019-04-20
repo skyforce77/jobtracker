@@ -2,10 +2,9 @@ package providers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"strconv"
 )
 
 type myWorkdayJobs struct {
@@ -231,7 +230,7 @@ type myWorkdayJobsPage struct {
 	SmdFetchTime           int    `json:"smdFetchTime"`
 }
 
-func (mwj *myWorkdayJobs) readPage(index int, mwjp *myWorkdayJobsPage, fn func(job *Job)) {
+func (mwj *myWorkdayJobs) readPage(index int, mwjp *myWorkdayJobsPage, fn func(job *Job)) error {
 	client := &http.Client{}
 
 	lnItems := 0
@@ -251,29 +250,29 @@ func (mwj *myWorkdayJobs) readPage(index int, mwjp *myWorkdayJobsPage, fn func(j
 
 						req, err := http.NewRequest("GET", mwj.url+item.Title.CommandLink, nil)
 						if err != nil {
-							log.Fatal(err)
+							return err
 						}
 						req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 						req.Header.Add("Accept", "application/json,application/xml")
 						res, err := client.Do(req)
 						if err != nil {
-							log.Fatal(err)
+							return err
 						}
 
 						if res.StatusCode != 200 {
-							log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+							return HandleStatus(res)
 						}
 
 						body, err := ioutil.ReadAll(res.Body)
 						if err != nil {
-							log.Fatal(err)
+							return err
 						}
 						res.Body.Close()
 
 						page := myWorkdayJobsPage{}
 						err = json.Unmarshal(body, &page)
 						if err != nil {
-							log.Fatal(err)
+							return err
 						}
 
 						job.Desc = page.Body.Children[1].Children[0].Children[2].Text
@@ -284,69 +283,70 @@ func (mwj *myWorkdayJobs) readPage(index int, mwjp *myWorkdayJobsPage, fn func(j
 
 			for _, point := range c.EndPoints {
 				if point.Type == "Pagination" && lnItems != 0 {
-					url := mwj.url + point.URI + fmt.Sprintf("/%d", index+lnItems)
+					url := mwj.url + point.URI + "/" + strconv.Itoa(index+lnItems)
 					req, err := http.NewRequest("GET", url, nil)
 					if err != nil {
-						log.Fatal(err)
+						return err
 					}
 					req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 					req.Header.Add("Accept", "application/json,application/xml")
 					res, err := client.Do(req)
 					if err != nil {
-						log.Fatal(err)
+						return err
 					}
 
 					if res.StatusCode != 200 {
-						log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+						return HandleStatus(res)
 					}
 
 					body, err := ioutil.ReadAll(res.Body)
 					if err != nil {
-						log.Fatal(err)
+						return err
 					}
 					res.Body.Close()
 
 					page := myWorkdayJobsPage{}
 					err = json.Unmarshal(body, &page)
 					if err != nil {
-						log.Fatal(err)
+						return err
 					}
 
-					mwj.readPage(index+lnItems, &page, fn)
+					return mwj.readPage(index+lnItems, &page, fn)
 				}
 			}
 		}
 	}
+	return nil
 }
 
-func (mwj *myWorkdayJobs) RetrieveJobs(fn func(job *Job)) {
+func (mwj *myWorkdayJobs) RetrieveJobs(fn func(job *Job)) error {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", mwj.url+mwj.home, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Accept", "application/json,application/xml")
 	res, err := client.Do(req)
 	defer res.Body.Close()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+		return HandleStatus(res)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	page := myWorkdayJobsPage{}
 	err = json.Unmarshal(body, &page)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	mwj.readPage(0, &page, fn)
+	return mwj.readPage(0, &page, fn)
 }

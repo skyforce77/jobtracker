@@ -3,7 +3,6 @@ package providers
 import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"log"
 	"net/http"
 )
 
@@ -15,16 +14,16 @@ func NewTwitter() *twitter {
 
 const twitterUrl = "https://careers.twitter.com/content/careers-twitter/en/jobs-search.html?q=&team=&location="
 
-func (twitter *twitter) requestJob(url string, fn func(job *Job)) {
+func (twitter *twitter) requestJob(url string, fn func(job *Job)) error {
 	res, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer res.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	job := Job{
@@ -45,9 +44,10 @@ func (twitter *twitter) requestJob(url string, fn func(job *Job)) {
 	})
 
 	fn(&job)
+	return nil
 }
 
-func (twitter *twitter) RetrieveJobs(fn func(job *Job)) {
+func (twitter *twitter) RetrieveJobs(fn func(job *Job)) error {
 	i := 0
 	ni := -1
 	for ni != i {
@@ -55,28 +55,29 @@ func (twitter *twitter) RetrieveJobs(fn func(job *Job)) {
 
 		res, err := http.Get(twitterUrl + fmt.Sprintf("&start=%d", i))
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if res.StatusCode != 200 {
-			log.Fatalf("status code error: %d %s\n", res.StatusCode, res.Status)
+			return HandleStatus(res)
 		}
 
 		doc, err := goquery.NewDocumentFromReader(res.Body)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		doc.Find(".job-search-entries .job-search-item a").Each(func(j int, s *goquery.Selection) {
 			url, ok := s.Attr("href")
 			if !ok {
-				log.Fatal(err)
+				return
 			}
 
 			i++
-			twitter.requestJob("https://careers.twitter.com"+url, fn)
+			err = twitter.requestJob("https://careers.twitter.com"+url, fn)
 		})
 
 		res.Body.Close()
+		return err
 	}
 }
