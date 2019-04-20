@@ -177,6 +177,7 @@ func (netflix *netflix) readPage(url string, fn func(job *Job)) error {
 			Link:     job.URL,
 		})
 	}
+	return nil
 }
 
 func (netflix *netflix) RetrieveJobs(fn func(job *Job)) error {

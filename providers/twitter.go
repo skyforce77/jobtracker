@@ -78,6 +78,9 @@ func (twitter *twitter) RetrieveJobs(fn func(job *Job)) error {
 		})
 
 		res.Body.Close()
-		return err
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }

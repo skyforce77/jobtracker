@@ -86,6 +86,6 @@ func (amazon *amazon) RetrieveJobs(fn func(job *Job)) error {
 
 		offset += len(search.Jobs)
 		res.Body.Close()
-		return nil
 	}
+	return nil
 }

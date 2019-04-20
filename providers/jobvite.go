@@ -30,6 +30,7 @@ func (jobvite *jobVite) requestJob(job *Job, fn func(job *Job)) error {
 	})
 
 	fn(job)
+	return nil
 }
 
 func (jobvite *jobVite) RetrieveJobs(fn func(job *Job)) error {
