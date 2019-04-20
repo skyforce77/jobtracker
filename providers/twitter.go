@@ -1,9 +1,9 @@
 package providers
 
 import (
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"net/http"
+	"strconv"
 )
 
 type twitter struct{}
@@ -53,7 +53,7 @@ func (twitter *twitter) RetrieveJobs(fn func(job *Job)) error {
 	for ni != i {
 		ni = i
 
-		res, err := http.Get(twitterUrl + fmt.Sprintf("&start=%d", i))
+		res, err := http.Get(twitterUrl + "&start=" + strconv.Itoa(i))
 		if err != nil {
 			return err
 		}
