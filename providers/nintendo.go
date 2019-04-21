@@ -2,8 +2,10 @@ package providers
 
 import (
 	"encoding/json"
+	"github.com/k3a/html2text"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type nintendo struct{}
@@ -53,7 +55,7 @@ func (nintendo *nintendo) RetrieveJobs(fn func(job *Job)) error {
 			"Nintendo",
 			j.JobPrimaryLocationCode + "," + j.JobLocationState,
 			string(FullTime),
-			j.DescriptionExternalHTML,
+			strings.TrimSpace(html2text.HTML2Text(j.DescriptionExternalHTML)),
 			"https://careers.nintendo.com/job-openings/listing/" + j.JobID + ".html",
 			nil,
 		})

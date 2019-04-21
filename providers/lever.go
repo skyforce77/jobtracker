@@ -2,10 +2,12 @@ package providers
 
 import (
 	"encoding/json"
+	"github.com/k3a/html2text"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type lever struct {
@@ -73,7 +75,7 @@ func (lever *lever) RetrieveJobs(fn func(job *Job)) error {
 				Company:  lever.company,
 				Location: job.Categories.Location,
 				Type:     job.Categories.Commitment,
-				Desc:     job.Description,
+				Desc:     strings.TrimSpace(html2text.HTML2Text(job.Description)),
 				Link:     job.HostedURL,
 			})
 		}

@@ -2,9 +2,11 @@ package providers
 
 import (
 	"encoding/json"
+	"github.com/k3a/html2text"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type myWorkdayJobs struct {
@@ -273,7 +275,7 @@ func (mwj *myWorkdayJobs) readJobs(mwjp *myWorkdayJobsPage, i int, j int, fn fun
 		if len(page.Body.Children) >= 2 &&
 			len(page.Body.Children[1].Children) >= 1 &&
 			len(page.Body.Children[1].Children[0].Children) >= 3 {
-			job.Desc = page.Body.Children[1].Children[0].Children[2].Text
+			job.Desc = strings.TrimSpace(html2text.HTML2Text(page.Body.Children[1].Children[0].Children[2].Text))
 		}
 		fn(&job)
 	}
