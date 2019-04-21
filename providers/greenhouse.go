@@ -77,7 +77,7 @@ type greenhouseJob struct {
 
 func (greenhouse *greenhouse) RetrieveJob(job *Job, jobId int, fn func(job *Job)) error {
 	res, err := http.Get("https://api.greenhouse.io/v1/boards/" +
-		greenhouse.slug + "/embed/job/?id="+strconv.Itoa(jobId))
+		greenhouse.slug + "/embed/job/?id=" + strconv.Itoa(jobId))
 	if err != nil {
 		return err
 	}
