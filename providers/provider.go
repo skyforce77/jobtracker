@@ -80,17 +80,24 @@ var (
 type Job struct {
 	// Title specifies the job title
 	Title string `json:"title"`
+
 	// Company specifies the company offering the job
+	//
 	// A single provider may provide multiple companies
 	Company string `json:"company"`
+
 	// Location is the location of the job's office
 	Location string `json:"location"`
+
 	// Type specifies the job schedule or contract type
 	Type string `json:"type"`
+
 	// Desc is the job's description
 	Desc string `json:"description"`
+
 	// Link refers to an HTTP URL providing the job offer
 	Link string `json:"link"`
+
 	// Misc may contain more specific information
 	Misc map[string]string `json:"misc"`
 }
@@ -127,6 +134,7 @@ func IterateOver(lst *list.List, fn func(*Job)) {
 // RetrieveAsync calls your function argument asynchronously
 //
 // This call is blocking to let you know when it finishes
+//
 // You should use it in a goroutine to avoid blocking
 func RetrieveAsync(provider Provider, fn func(*Job)) {
 	provider.RetrieveJobs(func(job *Job) {
