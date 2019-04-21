@@ -40,7 +40,7 @@ func (jobvite *jobVite) RetrieveJobs(fn func(job *Job)) error {
 	}
 
 	if res.StatusCode != 200 {
-		return HandleStatus(res)
+		return handleStatus(res)
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)

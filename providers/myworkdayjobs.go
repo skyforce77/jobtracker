@@ -230,57 +230,68 @@ type myWorkdayJobsPage struct {
 	SmdFetchTime           int    `json:"smdFetchTime"`
 }
 
+func (mwj *myWorkdayJobs) readJobs(mwjp *myWorkdayJobsPage, i int, j int, fn func(job *Job)) error {
+	client := &http.Client{}
+
+	w := mwjp.Body.Children[i].Children[j]
+	for _, item := range w.ListItems {
+		job := Job{
+			Title:    item.Title.Instances[0].Text,
+			Company:  mwj.company,
+			Location: item.Subtitles[0].Instances[0].Text,
+			Link:     mwj.url + item.Title.CommandLink,
+			Type:     string(FullTime),
+		}
+
+		req, err := http.NewRequest("GET", mwj.url+item.Title.CommandLink, nil)
+		if err != nil {
+			return err
+		}
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		req.Header.Add("Accept", "application/json,application/xml")
+		res, err := client.Do(req)
+		if err != nil {
+			return err
+		}
+
+		if res.StatusCode != 200 {
+			return handleStatus(res)
+		}
+
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+		res.Body.Close()
+
+		page := myWorkdayJobsPage{}
+		err = json.Unmarshal(body, &page)
+		if err != nil {
+			return err
+		}
+
+		if len(page.Body.Children) >= 2 &&
+			len(page.Body.Children[1].Children) >= 1 &&
+			len(page.Body.Children[1].Children[0].Children) >= 3 {
+			job.Desc = page.Body.Children[1].Children[0].Children[2].Text
+		}
+		fn(&job)
+	}
+	return nil
+}
+
 func (mwj *myWorkdayJobs) readPage(index int, mwjp *myWorkdayJobsPage, fn func(job *Job)) error {
 	client := &http.Client{}
 
 	lnItems := 0
-	for _, c := range mwjp.Body.Children {
+	for i, c := range mwjp.Body.Children {
 		if c.Widget == "facetSearchResult" {
-			for _, w := range c.Children {
+			for j, w := range c.Children {
 				if w.Widget == "facetSearchResultList" {
 					lnItems = len(w.ListItems)
-					for _, item := range w.ListItems {
-						job := Job{
-							Title:    item.Title.Instances[0].Text,
-							Company:  mwj.company,
-							Location: item.Subtitles[0].Instances[0].Text,
-							Link:     mwj.url + item.Title.CommandLink,
-							Type:     string(FullTime),
-						}
-
-						req, err := http.NewRequest("GET", mwj.url+item.Title.CommandLink, nil)
-						if err != nil {
-							return err
-						}
-						req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-						req.Header.Add("Accept", "application/json,application/xml")
-						res, err := client.Do(req)
-						if err != nil {
-							return err
-						}
-
-						if res.StatusCode != 200 {
-							return HandleStatus(res)
-						}
-
-						body, err := ioutil.ReadAll(res.Body)
-						if err != nil {
-							return err
-						}
-						res.Body.Close()
-
-						page := myWorkdayJobsPage{}
-						err = json.Unmarshal(body, &page)
-						if err != nil {
-							return err
-						}
-
-						if len(page.Body.Children) >= 2 &&
-							len(page.Body.Children[1].Children) >= 1 &&
-							len(page.Body.Children[1].Children[0].Children) >= 3 {
-							job.Desc = page.Body.Children[1].Children[0].Children[2].Text
-						}
-						fn(&job)
+					err := mwj.readJobs(mwjp, i, j, fn)
+					if err != nil {
+						return err
 					}
 				}
 			}
@@ -300,7 +311,7 @@ func (mwj *myWorkdayJobs) readPage(index int, mwjp *myWorkdayJobsPage, fn func(j
 					}
 
 					if res.StatusCode != 200 {
-						return HandleStatus(res)
+						return handleStatus(res)
 					}
 
 					body, err := ioutil.ReadAll(res.Body)
@@ -332,13 +343,13 @@ func (mwj *myWorkdayJobs) RetrieveJobs(fn func(job *Job)) error {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Accept", "application/json,application/xml")
 	res, err := client.Do(req)
-	defer res.Body.Close()
 	if err != nil {
 		return err
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		return HandleStatus(res)
+		return handleStatus(res)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)

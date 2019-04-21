@@ -82,63 +82,6 @@ type netflixSearch struct {
 			NumPages         int    `json:"num_pages"`
 			PerPage          int    `json:"per_page"`
 			TotalResultCount int    `json:"total_result_count"`
-			Facets           struct {
-				Location struct {
-					LosAngelesCalifornia int `json:"Los Angeles, California"`
-					LosGatosCalifornia   int `json:"Los Gatos, California"`
-					AmsterdamNetherlands int `json:"Amsterdam, Netherlands"`
-					LondonUnitedKingdom  int `json:"London, United Kingdom"`
-					SingaporeSingapore   int `json:"Singapore, Singapore"`
-					TokyoJapan           int `json:"Tokyo, Japan"`
-					AlphavilleBrazil     int `json:"Alphaville, Brazil"`
-					SeoulSouthKorea      int `json:"Seoul, South Korea"`
-					MumbaiIndia          int `json:"Mumbai, India"`
-					MadridSpain          int `json:"Madrid, Spain"`
-					ParisFrance          int `json:"Paris, France"`
-					SaltLakeCityUtah     int `json:"Salt Lake City, Utah"`
-					NewYorkNewYork       int `json:"New York, New York"`
-					MakatiPhilippines    int `json:"Makati, Philippines"`
-					FremontCalifornia    int `json:"Fremont, California"`
-					MexicoCityMexico     int `json:"Mexico City, Mexico"`
-				} `json:"location"`
-				Team struct {
-					Legal                            int `json:"Legal"`
-					PostProduction                   int `json:"Post Production"`
-					CreativeProduction               int `json:"Creative Production"`
-					FinancialPlanningAndAnalysis     int `json:"Financial Planning and Analysis"`
-					Marketing                        int `json:"Marketing"`
-					Finance                          int `json:"Finance"`
-					ContentEngineering               int `json:"Content Engineering"`
-					ProductEngineering               int `json:"Product Engineering"`
-					Production                       int `json:"Production"`
-					Facilities                       int `json:"Facilities"`
-					CloudAndPlatformEngineering      int `json:"Cloud and Platform Engineering"`
-					PR                               int `json:"PR"`
-					DataEngineeringAndInfrastructure int `json:"Data Engineering and Infrastructure"`
-					CustomerService                  int `json:"Customer Service"`
-					HumanResources                   int `json:"Human Resources"`
-					ScienceAndAnalytics              int `json:"Science and Analytics"`
-					Content                          int `json:"Content"`
-					ProductDesign                    int `json:"Product Design"`
-					Recruiting                       int `json:"Recruiting"`
-					UIEngineering                    int `json:"UI Engineering"`
-					PartnerEcosystemEngineering      int `json:"Partner Ecosystem Engineering"`
-					BusinessDevelopment              int `json:"Business Development"`
-					ConsumerInsights                 int `json:"Consumer Insights"`
-					EmployeeTechnology               int `json:"Employee Technology"`
-					InformationSecurity              int `json:"Information Security"`
-					StreamingClient                  int `json:"Streaming Client"`
-					Globalization                    int `json:"Globalization"`
-					ContentDelivery                  int `json:"Content Delivery"`
-					CreativeMarketingProduction      int `json:"Creative Marketing Production"`
-					PartnerDevices                   int `json:"Partner Devices"`
-					ProductManagement                int `json:"Product Management"`
-					ContentAcquisition               int `json:"Content Acquisition"`
-					CustomerServiceAdministration    int `json:"Customer Service Administration"`
-					MarketingProduction              int `json:"Marketing Production"`
-					ProductionTechnologies           int `json:"Production Technologies"`
-				} `json:"team"`
-			} `json:"facets"`
 		} `json:"postings"`
 	} `json:"info"`
 	Errors struct {
@@ -153,7 +96,7 @@ func (netflix *netflix) readPage(url string, fn func(job *Job)) error {
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		return HandleStatus(res)
+		return handleStatus(res)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
@@ -188,7 +131,7 @@ func (netflix *netflix) RetrieveJobs(fn func(job *Job)) error {
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		return HandleStatus(res)
+		return handleStatus(res)
 	}
 
 	body, err := ioutil.ReadAll(res.Body)

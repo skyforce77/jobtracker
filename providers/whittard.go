@@ -53,7 +53,7 @@ func (whittard *whittard) RetrieveJobs(fn func(job *Job)) error {
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		return HandleStatus(res)
+		return handleStatus(res)
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
