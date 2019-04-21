@@ -3,12 +3,16 @@ package providers
 import (
 	"github.com/PuerkitoBio/goquery"
 	"net/http"
+	"regexp"
+	"strings"
 )
 
 type jobVite struct {
 	company string
 	url     string
 }
+
+var jvRegex = regexp.MustCompile(`([a-zA-Z].+),\s+(.+)`)
 
 func (jobvite *jobVite) requestJob(job *Job, fn func(job *Job)) error {
 	res, err := http.Get(job.Link)
@@ -64,7 +68,7 @@ func (jobvite *jobVite) RetrieveJobs(fn func(job *Job)) error {
 
 				job.Link = "https://jobs.jobvite.com" + url
 			} else if i == 1 {
-				job.Location = s.Text()
+				job.Location = jvRegex.ReplaceAllString(strings.TrimSpace(s.Text()), "$1, $2")
 			}
 		})
 
@@ -85,7 +89,7 @@ func (jobvite *jobVite) RetrieveJobs(fn func(job *Job)) error {
 
 		s.Children().Each(func(i int, s *goquery.Selection) {
 			if i == 1 {
-				job.Location = s.Text()
+				job.Location = jvRegex.ReplaceAllString(strings.TrimSpace(s.Text()), "$1, $2")
 			}
 		})
 
