@@ -1,5 +1,8 @@
 # JobTracker
 
+[![go report](https://goreportcard.com/badge/github.com/IDerr/jobtracker)](https://goreportcard.com/report/github.com/IDerr/jobtracker)
+[![](https://godoc.org/github.com/IDerr/jobtracker/providers?status.svg)](https://godoc.org/github.com/IDerr/jobtracker/providers)
+
 JobTracker aims to help you find your future dream job.
 You can use our library to scrap and export jobs from 50+ providers.
 
