@@ -37,6 +37,8 @@ var (
 		NewFico(),
 		NewFlextronics(),
 		NewGamestop(),
+		NewGithub(),
+		NewGreenhouse(),
 		NewGumGum(),
 		NewHottopic(),
 		NewJourny(),
