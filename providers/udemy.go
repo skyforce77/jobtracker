@@ -4,7 +4,8 @@ type udemy struct {
 	lever
 }
 
-func NewUdemy() *udemy {
+// NewUdemy returns a new provider
+func NewUdemy() Provider {
 	return &udemy{
 		lever{
 			"Udemy",

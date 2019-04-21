@@ -4,7 +4,8 @@ type hottopic struct {
 	lever
 }
 
-func NewHottopic() *hottopic {
+// NewHottopic returns a new provider
+func NewHottopic() Provider {
 	return &hottopic{
 		lever{
 			"Hot Topic",

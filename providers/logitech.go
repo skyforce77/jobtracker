@@ -4,7 +4,8 @@ type logitech struct {
 	jobVite
 }
 
-func NewLogitech() *logitech {
+// NewLogitech returns a new provider
+func NewLogitech() Provider {
 	return &logitech{
 		jobVite{
 			"Logitech",

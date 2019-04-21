@@ -4,7 +4,8 @@ type betclic struct {
 	jobVite
 }
 
-func NewBetclic() *betclic {
+// NewBetclic returns a new provider
+func NewBetclic() Provider {
 	return &betclic{
 		jobVite{
 			"Betclic",

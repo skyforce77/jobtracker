@@ -4,7 +4,8 @@ type strait struct {
 	lever
 }
 
-func NewStrait() *strait {
+// NewStrait returns a new provider
+func NewStrait() Provider {
 	return &strait{
 		lever{
 			"Strait",

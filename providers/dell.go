@@ -4,7 +4,8 @@ type dell struct {
 	myWorkdayJobs
 }
 
-func NewDell() *dell {
+// NewDell returns a new provider
+func NewDell() Provider {
 	return &dell{
 		myWorkdayJobs{
 			"Dell",

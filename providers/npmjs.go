@@ -4,7 +4,8 @@ type npmjs struct {
 	lever
 }
 
-func NewNpmjs() *npmjs {
+// NewNpmjs returns a new provider
+func NewNpmjs() Provider {
 	return &npmjs{
 		lever{
 			"Npmjs",

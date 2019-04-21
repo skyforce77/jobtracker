@@ -7,7 +7,8 @@ import (
 
 type whittard struct{}
 
-func NewWhittard() *whittard {
+// NewWhittard returns a new provider
+func NewWhittard() Provider {
 	return &whittard{}
 }
 

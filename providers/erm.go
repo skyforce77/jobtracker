@@ -4,7 +4,8 @@ type erm struct {
 	myWorkdayJobs
 }
 
-func NewERM() *erm {
+// NewERM returns a new provider
+func NewERM() Provider {
 	return &erm{
 		myWorkdayJobs{
 			"ERM",

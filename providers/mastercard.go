@@ -4,7 +4,8 @@ type mastercard struct {
 	myWorkdayJobs
 }
 
-func NewMastercard() *mastercard {
+// NewMastercard returns a new provider
+func NewMastercard() Provider {
 	return &mastercard{
 		myWorkdayJobs{
 			"Mastercard",

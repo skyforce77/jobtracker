@@ -10,7 +10,8 @@ import (
 
 type netflix struct{}
 
-func NewNetflix() *netflix {
+// NewNetflix returns a new provider
+func NewNetflix() Provider {
 	return &netflix{}
 }
 

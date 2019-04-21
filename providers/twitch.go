@@ -4,7 +4,8 @@ type twitch struct {
 	lever
 }
 
-func NewTwitch() *twitch {
+// NewTwitch returns a new provider
+func NewTwitch() Provider {
 	return &twitch{
 		lever{
 			"Twitch",

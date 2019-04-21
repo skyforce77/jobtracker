@@ -8,11 +8,12 @@ import (
 
 type twitter struct{}
 
-func NewTwitter() *twitter {
+// NewTwitter returns a new provider
+func NewTwitter() Provider {
 	return &twitter{}
 }
 
-const twitterUrl = "https://careers.twitter.com/content/careers-twitter/en/jobs-search.html?q=&team=&location="
+const twitterURL = "https://careers.twitter.com/content/careers-twitter/en/jobs-search.html?q=&team=&location="
 
 func (twitter *twitter) requestJob(url string, fn func(job *Job)) error {
 	res, err := http.Get(url)
@@ -53,7 +54,7 @@ func (twitter *twitter) RetrieveJobs(fn func(job *Job)) error {
 	for ni != i {
 		ni = i
 
-		res, err := http.Get(twitterUrl + "&start=" + strconv.Itoa(i))
+		res, err := http.Get(twitterURL + "&start=" + strconv.Itoa(i))
 		if err != nil {
 			return err
 		}

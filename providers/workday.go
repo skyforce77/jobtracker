@@ -4,7 +4,8 @@ type workday struct {
 	myWorkdayJobs
 }
 
-func NewWorkday() *workday {
+// NewWorkday returns a new provider
+func NewWorkday() Provider {
 	return &workday{
 		myWorkdayJobs{
 			"Workday",

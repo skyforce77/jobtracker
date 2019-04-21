@@ -4,7 +4,8 @@ type salesforce struct {
 	myWorkdayJobs
 }
 
-func NewSalesforce() *salesforce {
+// NewSalesforce returns a new provider
+func NewSalesforce() Provider {
 	return &salesforce{
 		myWorkdayJobs{
 			"Salesforce",

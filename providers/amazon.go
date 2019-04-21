@@ -10,11 +10,12 @@ import (
 
 type amazon struct{}
 
-func NewAmazon() *amazon {
+// NewAmazon returns a new provider
+func NewAmazon() Provider {
 	return &amazon{}
 }
 
-const amazonUrl = "https://www.amazon.jobs/fr/search.json?base_query=&city=&country=&county=&facets%5B%5D=location&facets%5B%5D=business_category&facets%5B%5D=category&facets%5B%5D=schedule_type_id&facets%5B%5D=employee_class&facets%5B%5D=normalized_location&facets%5B%5D=job_function_id&latitude=&loc_group_id=&loc_query=&longitude=&query_options=&radius=24km&region=&result_limit=200&sort=recent"
+const amazonURL = "https://www.amazon.jobs/fr/search.json?base_query=&city=&country=&county=&facets%5B%5D=location&facets%5B%5D=business_category&facets%5B%5D=category&facets%5B%5D=schedule_type_id&facets%5B%5D=employee_class&facets%5B%5D=normalized_location&facets%5B%5D=job_function_id&latitude=&loc_group_id=&loc_query=&longitude=&query_options=&radius=24km&region=&result_limit=200&sort=recent"
 
 type amazonPage struct {
 	Error interface{} `json:"error"`
@@ -49,7 +50,7 @@ func (amazon *amazon) RetrieveJobs(fn func(job *Job)) error {
 	offset := 0
 	hits := 1
 	for offset < hits {
-		res, err := http.Get(amazonUrl + "&offset=" + strconv.Itoa(offset))
+		res, err := http.Get(amazonURL + "&offset=" + strconv.Itoa(offset))
 		if err != nil {
 			return err
 		}

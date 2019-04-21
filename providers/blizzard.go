@@ -4,7 +4,8 @@ type blizzard struct {
 	jobVite
 }
 
-func NewBlizzard() *blizzard {
+// NewBlizzard returns a new provider
+func NewBlizzard() Provider {
 	return &blizzard{
 		jobVite{
 			"Blizzard",

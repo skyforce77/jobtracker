@@ -4,7 +4,8 @@ type thales struct {
 	myWorkdayJobs
 }
 
-func NewThales() *thales {
+// NewThales returns a new provider
+func NewThales() Provider {
 	return &thales{
 		myWorkdayJobs{
 			"Thales",

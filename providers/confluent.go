@@ -4,7 +4,8 @@ type confluent struct {
 	lever
 }
 
-func NewConfluent() *confluent {
+// NewConfluent returns a new provider
+func NewConfluent() Provider {
 	return &confluent{
 		lever{
 			"Confluent",

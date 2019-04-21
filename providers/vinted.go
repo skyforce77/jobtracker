@@ -4,7 +4,8 @@ type vinted struct {
 	lever
 }
 
-func NewVinted() *vinted {
+// NewVinted returns a new provider
+func NewVinted() Provider {
 	return &vinted{
 		lever{
 			"Vinted",

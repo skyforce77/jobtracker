@@ -4,7 +4,8 @@ type flextronics struct {
 	myWorkdayJobs
 }
 
-func NewFlextronics() *flextronics {
+// NewFlextronics returns a new provider
+func NewFlextronics() Provider {
 	return &flextronics{
 		myWorkdayJobs{
 			"Flextronics",

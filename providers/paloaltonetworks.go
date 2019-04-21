@@ -4,7 +4,8 @@ type paloAltoNetworks struct {
 	jobVite
 }
 
-func NewPaloAltoNetworks() *paloAltoNetworks {
+// NewPaloAltoNetworks returns a new provider
+func NewPaloAltoNetworks() Provider {
 	return &paloAltoNetworks{
 		jobVite{
 			"Palo Alto Networks",

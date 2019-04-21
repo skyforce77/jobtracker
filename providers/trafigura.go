@@ -4,7 +4,8 @@ type trafigura struct {
 	myWorkdayJobs
 }
 
-func NewTrafigura() *trafigura {
+// NewTrafigura returns a new provider
+func NewTrafigura() Provider {
 	return &trafigura{
 		myWorkdayJobs{
 			"Trafigura",

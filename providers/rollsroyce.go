@@ -4,7 +4,8 @@ type rollsRoyce struct {
 	myWorkdayJobs
 }
 
-func NewRollsRoyce() *rollsRoyce {
+// NewRollsRoyce returns a new provider
+func NewRollsRoyce() Provider {
 	return &rollsRoyce{
 		myWorkdayJobs{
 			"Rolls-Royce",

@@ -13,7 +13,8 @@ type lever struct {
 	slug    string
 }
 
-func NewLever() *lever {
+// NewLever returns a new provider
+func NewLever() Provider {
 	return &lever{
 		"Lever",
 		"lever",

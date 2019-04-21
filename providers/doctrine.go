@@ -4,7 +4,8 @@ type doctrine struct {
 	lever
 }
 
-func NewDoctrine() *doctrine {
+// NewDoctrine returns a new provider
+func NewDoctrine() Provider {
 	return &doctrine{
 		lever{
 			"Doctrine",

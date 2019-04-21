@@ -4,7 +4,8 @@ type dukeEnergy struct {
 	myWorkdayJobs
 }
 
-func NewDukeEnergy() *dukeEnergy {
+// NewDukeEnergy returns a new provider
+func NewDukeEnergy() Provider {
 	return &dukeEnergy{
 		myWorkdayJobs{
 			"Duke Energy",

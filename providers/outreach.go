@@ -4,7 +4,8 @@ type outreach struct {
 	lever
 }
 
-func NewOutreach() *outreach {
+// NewOutreach returns a new provider
+func NewOutreach() Provider {
 	return &outreach{
 		lever{
 			"Outreach",

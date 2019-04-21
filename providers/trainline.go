@@ -4,7 +4,8 @@ type trainline struct {
 	lever
 }
 
-func NewTrainline() *trainline {
+// NewTrainline returns a new provider
+func NewTrainline() Provider {
 	return &trainline{
 		lever{
 			"Trainline",

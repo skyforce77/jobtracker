@@ -4,7 +4,8 @@ type nytimes struct {
 	myWorkdayJobs
 }
 
-func NewNYTimes() *nytimes {
+// NewNYTimes returns a new provider
+func NewNYTimes() Provider {
 	return &nytimes{
 		myWorkdayJobs{
 			"New York Times",

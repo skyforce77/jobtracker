@@ -4,7 +4,8 @@ type medium struct {
 	lever
 }
 
-func NewMedium() *medium {
+// NewMedium returns a new provider
+func NewMedium() Provider {
 	return &medium{
 		lever{
 			"Medium",

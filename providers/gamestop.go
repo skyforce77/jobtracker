@@ -4,7 +4,8 @@ type gamestop struct {
 	myWorkdayJobs
 }
 
-func NewGamestop() *gamestop {
+// NewGamestop returns a new provider
+func NewGamestop() Provider {
 	return &gamestop{
 		myWorkdayJobs{
 			"Gamestop",

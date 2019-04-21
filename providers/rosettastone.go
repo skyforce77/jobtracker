@@ -4,7 +4,8 @@ type rosettaStone struct {
 	jobVite
 }
 
-func NewRosettaStone() *rosettaStone {
+// NewRosettaStone returns a new provider
+func NewRosettaStone() Provider {
 	return &rosettaStone{
 		jobVite{
 			"Rosetta Stone",

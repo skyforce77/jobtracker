@@ -4,7 +4,8 @@ type kickstarter struct {
 	lever
 }
 
-func NewKickStarter() *kickstarter {
+// NewKickStarter returns a new provider
+func NewKickStarter() Provider {
 	return &kickstarter{
 		lever{
 			"KickStarter",

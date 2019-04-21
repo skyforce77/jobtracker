@@ -7,11 +7,12 @@ import (
 
 type pokemon struct{}
 
-func NewPokemon() *pokemon {
+// NewPokemon returns a new provider
+func NewPokemon() Provider {
 	return &pokemon{}
 }
 
-const pokemonUrl = "https://chj.tbe.taleo.net/chj04/ats/careers/searchResults.jsp?org=POKEMON&cws=1"
+const pokemonURL = "https://chj.tbe.taleo.net/chj04/ats/careers/searchResults.jsp?org=POKEMON&cws=1"
 
 func (pokemon *pokemon) requestJob(url string, fn func(job *Job)) error {
 	res, err := http.Get(url)
@@ -48,7 +49,7 @@ func (pokemon *pokemon) requestJob(url string, fn func(job *Job)) error {
 }
 
 func (pokemon *pokemon) RetrieveJobs(fn func(job *Job)) error {
-	res, err := http.Get(pokemonUrl)
+	res, err := http.Get(pokemonURL)
 	if err != nil {
 		return err
 	}

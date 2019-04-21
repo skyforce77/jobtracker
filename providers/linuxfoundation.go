@@ -4,7 +4,8 @@ type linuxFoundation struct {
 	lever
 }
 
-func NewLinuxFoundation() *linuxFoundation {
+// NewLinuxFoundation returns a new provider
+func NewLinuxFoundation() Provider {
 	return &linuxFoundation{
 		lever{
 			"Linux Foundation",

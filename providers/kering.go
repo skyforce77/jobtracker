@@ -4,7 +4,8 @@ type kering struct {
 	myWorkdayJobs
 }
 
-func NewKering() *kering {
+// NewKering returns a new provider
+func NewKering() Provider {
 	return &kering{
 		myWorkdayJobs{
 			"Kering",

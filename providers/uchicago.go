@@ -4,7 +4,8 @@ type uchicago struct {
 	myWorkdayJobs
 }
 
-func NewUniversityOfChicago() *uchicago {
+// NewUniversityOfChicago returns a new provider
+func NewUniversityOfChicago() Provider {
 	return &uchicago{
 		myWorkdayJobs{
 			"The University Of Chicago",

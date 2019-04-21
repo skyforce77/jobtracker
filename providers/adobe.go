@@ -13,7 +13,8 @@ func (adobe *adobe) RetrieveJobs(fn func(job *Job)) error {
 	return adobe.university.RetrieveJobs(fn)
 }
 
-func NewAdobe() *adobe {
+// NewAdobe returns a new provider
+func NewAdobe() Provider {
 	return &adobe{
 		myWorkdayJobs{
 			"Adobe",

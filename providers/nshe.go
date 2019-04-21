@@ -4,7 +4,8 @@ type nshe struct {
 	myWorkdayJobs
 }
 
-func NewUniversityOfNevadaReno() *nshe {
+// NewUniversityOfNevadaReno returns a new provider
+func NewUniversityOfNevadaReno() Provider {
 	return &nshe{
 		myWorkdayJobs{
 			"University Of Nevada, Reno",

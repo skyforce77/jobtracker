@@ -4,7 +4,8 @@ type soundcloud struct {
 	jobVite
 }
 
-func NewSoundcloud() *soundcloud {
+// NewSoundcloud returns a new provider
+func NewSoundcloud() Provider {
 	return &soundcloud{
 		jobVite{
 			"Soundcloud",

@@ -4,7 +4,8 @@ type fico struct {
 	myWorkdayJobs
 }
 
-func NewFico() *fico {
+// NewFico returns a new provider
+func NewFico() Provider {
 	return &fico{
 		myWorkdayJobs{
 			"Fico",

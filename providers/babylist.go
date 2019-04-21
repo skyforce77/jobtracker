@@ -4,7 +4,8 @@ type babylist struct {
 	lever
 }
 
-func NewBabylist() *babylist {
+// NewBabylist returns a new provider
+func NewBabylist() Provider {
 	return &babylist{
 		lever{
 			"Babylist",

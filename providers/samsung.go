@@ -13,7 +13,8 @@ func (samsung *samsung) RetrieveJobs(fn func(job *Job)) error {
 	return samsung.jobVite.RetrieveJobs(fn)
 }
 
-func NewSamsung() *samsung {
+// NewSamsung returns a new provider
+func NewSamsung() Provider {
 	return &samsung{
 		jobVite{
 			"Samsung",

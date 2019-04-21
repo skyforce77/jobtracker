@@ -11,7 +11,8 @@ import (
 
 type disney struct{}
 
-func NewDisney() *disney {
+// NewDisney returns a new provider
+func NewDisney() Provider {
 	return &disney{}
 }
 
@@ -20,7 +21,7 @@ type disneySearch struct {
 	HasJobs bool   `json:"hasJobs"`
 }
 
-const disneyUrl = "https://jobs.disneycareers.com/search-jobs/results?ActiveFacetID=0&RecordsPerPage=15&Distance=50&RadiusUnitType=0&Keywords=&Location=&Latitude=&Longitude=&ShowRadius=False&CustomFacetName=&FacetTerm=&FacetType=0&SearchResultsModuleName=Search+Results&SearchFiltersModuleName=Search+Filters&SortCriteria=0&SortDirection=1&SearchType=5&CategoryFacetTerm=&CategoryFacetType=&LocationFacetTerm=&LocationFacetType=&KeywordType=&LocationType=&LocationPath=&OrganizationIds=&PostalCode=&fc=&fl=&fcf=&afc=&afl=&afcf=&CurrentPage="
+const disneyURL = "https://jobs.disneycareers.com/search-jobs/results?ActiveFacetID=0&RecordsPerPage=15&Distance=50&RadiusUnitType=0&Keywords=&Location=&Latitude=&Longitude=&ShowRadius=False&CustomFacetName=&FacetTerm=&FacetType=0&SearchResultsModuleName=Search+Results&SearchFiltersModuleName=Search+Filters&SortCriteria=0&SortDirection=1&SearchType=5&CategoryFacetTerm=&CategoryFacetType=&LocationFacetTerm=&LocationFacetType=&KeywordType=&LocationType=&LocationPath=&OrganizationIds=&PostalCode=&fc=&fl=&fcf=&afc=&afl=&afcf=&CurrentPage="
 
 func (disney *disney) requestJob(url string, fn func(job *Job)) error {
 	res, err := http.Get(url)
@@ -57,7 +58,7 @@ func (disney *disney) requestJob(url string, fn func(job *Job)) error {
 }
 
 func (disney *disney) readPage(page int, search *disneySearch, fn func(job *Job)) error {
-	res, err := http.Get(disneyUrl + strconv.Itoa(page))
+	res, err := http.Get(disneyURL + strconv.Itoa(page))
 	if err != nil {
 		return err
 	}

@@ -4,7 +4,8 @@ type journy struct {
 	lever
 }
 
-func NewJourny() *journy {
+// NewJourny returns a new provider
+func NewJourny() Provider {
 	return &journy{
 		lever{
 			"Journy",

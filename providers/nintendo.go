@@ -8,7 +8,8 @@ import (
 
 type nintendo struct{}
 
-func NewNintendo() *nintendo {
+// NewNintendo returns a new provider
+func NewNintendo() Provider {
 	return &nintendo{}
 }
 

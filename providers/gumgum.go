@@ -4,7 +4,8 @@ type gumgum struct {
 	jobVite
 }
 
-func NewGumGum() *gumgum {
+// NewGumGum returns a new provider
+func NewGumGum() Provider {
 	return &gumgum{
 		jobVite{
 			"GumGum",

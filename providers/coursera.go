@@ -4,7 +4,8 @@ type coursera struct {
 	lever
 }
 
-func NewCoursera() *coursera {
+// NewCoursera returns a new provider
+func NewCoursera() Provider {
 	return &coursera{
 		lever{
 			"Coursera",

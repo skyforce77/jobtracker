@@ -4,7 +4,8 @@ type eventbrite struct {
 	lever
 }
 
-func NewEventBrite() *eventbrite {
+// NewEventBrite returns a new provider
+func NewEventBrite() Provider {
 	return &eventbrite{
 		lever{
 			"EventBrite",

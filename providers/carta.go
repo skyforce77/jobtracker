@@ -4,7 +4,8 @@ type carta struct {
 	lever
 }
 
-func NewCarta() *carta {
+// NewCarta returns a new provider
+func NewCarta() Provider {
 	return &carta{
 		lever{
 			"Carta",

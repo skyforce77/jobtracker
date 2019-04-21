@@ -4,7 +4,8 @@ type scribd struct {
 	lever
 }
 
-func NewScribd() *scribd {
+// NewScribd returns a new provider
+func NewScribd() Provider {
 	return &scribd{
 		lever{
 			"Scribd",

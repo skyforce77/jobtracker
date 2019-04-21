@@ -13,7 +13,8 @@ func (sanofi *sanofi) RetrieveJobs(fn func(job *Job)) error {
 	return sanofi.students.RetrieveJobs(fn)
 }
 
-func NewSanofi() *sanofi {
+// NewSanofi returns a new provider
+func NewSanofi() Provider {
 	return &sanofi{
 		myWorkdayJobs{
 			"Sanofi",
