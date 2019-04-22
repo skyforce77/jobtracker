@@ -9,7 +9,7 @@ func NewStrait() Provider {
 	return &strait{
 		lever{
 			"Strait",
-			"strait",
+			"straitcapital",
 		},
 	}
 }

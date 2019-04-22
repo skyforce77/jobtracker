@@ -9,7 +9,7 @@ func NewTrainline() Provider {
 	return &trainline{
 		lever{
 			"Trainline",
-			"trainline",
+			"thetrainline",
 		},
 	}
 }

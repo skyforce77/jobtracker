@@ -9,7 +9,7 @@ func NewNpmjs() Provider {
 	return &npmjs{
 		lever{
 			"Npmjs",
-			"npmjs",
+			"npm",
 		},
 	}
 }

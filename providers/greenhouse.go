@@ -27,52 +27,16 @@ func NewGreenhouse() Provider {
 type greenhouseSearch struct {
 	Jobs []struct {
 		AbsoluteURL   string `json:"absolute_url"`
-		InternalJobID int    `json:"internal_job_id"`
 		Location      struct {
 			Name string `json:"name"`
 		} `json:"location"`
-		Metadata []struct {
-			ID        int    `json:"id"`
-			Name      string `json:"name"`
-			Value     string `json:"value"`
-			ValueType string `json:"value_type"`
-		} `json:"metadata"`
-		ID            int    `json:"id"`
-		UpdatedAt     string `json:"updated_at"`
-		RequisitionID string `json:"requisition_id"`
-		Title         string `json:"title"`
-		Education     string `json:"education,omitempty"`
+		ID            int         `json:"id"`
+		Title         string      `json:"title"`
 	} `json:"jobs"`
-	Meta struct {
-		Total int `json:"total"`
-	} `json:"meta"`
 }
 
 type greenhouseJob struct {
-	AbsoluteURL   string `json:"absolute_url"`
-	InternalJobID int    `json:"internal_job_id"`
-	Location      struct {
-		Name string `json:"name"`
-	} `json:"location"`
-	Metadata      interface{} `json:"metadata"`
-	ID            int         `json:"id"`
-	UpdatedAt     string      `json:"updated_at"`
-	RequisitionID interface{} `json:"requisition_id"`
-	Title         string      `json:"title"`
 	Content       string      `json:"content"`
-	Departments   []struct {
-		ID       int           `json:"id"`
-		Name     string        `json:"name"`
-		ChildIds []interface{} `json:"child_ids"`
-		ParentID interface{}   `json:"parent_id"`
-	} `json:"departments"`
-	Offices []struct {
-		ID       int           `json:"id"`
-		Name     string        `json:"name"`
-		Location string        `json:"location"`
-		ChildIds []interface{} `json:"child_ids"`
-		ParentID interface{}   `json:"parent_id"`
-	} `json:"offices"`
 }
 
 func (greenhouse *greenhouse) RetrieveJob(job *Job, jobId int, fn func(job *Job)) error {
