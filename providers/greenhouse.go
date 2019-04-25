@@ -26,17 +26,17 @@ func NewGreenhouse() Provider {
 
 type greenhouseSearch struct {
 	Jobs []struct {
-		AbsoluteURL   string `json:"absolute_url"`
-		Location      struct {
+		AbsoluteURL string `json:"absolute_url"`
+		Location    struct {
 			Name string `json:"name"`
 		} `json:"location"`
-		ID            int         `json:"id"`
-		Title         string      `json:"title"`
+		ID    int    `json:"id"`
+		Title string `json:"title"`
 	} `json:"jobs"`
 }
 
 type greenhouseJob struct {
-	Content       string      `json:"content"`
+	Content string `json:"content"`
 }
 
 func (greenhouse *greenhouse) RetrieveJob(job *Job, jobId int, fn func(job *Job)) error {

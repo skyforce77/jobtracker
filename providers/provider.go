@@ -15,6 +15,7 @@ const (
 	Temporary      JobType = "Temporary"
 	Internship     JobType = "Internship"
 	Apprenticeship JobType = "Apprenticeship"
+	VI             JobType = "Volontariat International (French Citizen)"
 )
 
 var (
