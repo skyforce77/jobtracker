@@ -9,7 +9,7 @@ import (
 
 type civiweb struct{}
 
-// NewTwitter returns a new provider
+// NewCiviweb returns a new provider
 func NewCiviweb() Provider {
 	return &civiweb{}
 }
