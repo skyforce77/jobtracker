@@ -185,3 +185,4 @@ p.RetrieveJobs(func(job *providers.Job) {
 | Teralytics | Teralytics |
 | Oseberg | Oseberg |
 | Peek | Peek |
+| Civiweb | All "VI" jobs, French citizens only |

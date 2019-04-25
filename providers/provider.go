@@ -186,6 +186,7 @@ var (
 		NewTeralytics(),
 		NewOseberg(),
 		NewPeek(),
+		NewCiviweb(),
 	}
 )
 
