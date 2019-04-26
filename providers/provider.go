@@ -1,7 +1,9 @@
 package providers
 
 import (
+	"bytes"
 	"container/list"
+	"crypto/md5"
 )
 
 // JobType represents a job type, by schedule and by contract
@@ -216,6 +218,15 @@ type Job struct {
 	Misc map[string]string `json:"misc"`
 }
 
+// Hash returns the structure md5 sum based on job title, company and location
+func (job *Job) Hash() [16]byte {
+	var b bytes.Buffer
+	b.Write([]byte(job.Title))
+	b.Write([]byte(job.Company))
+	b.Write([]byte(job.Location))
+	return md5.Sum(b.Bytes())
+}
+
 // Provider is able to scrap jobs from a specific website
 type Provider interface {
 	// RetrieveJobs starts the jobs scraping
@@ -259,4 +270,53 @@ func RetrieveAsync(provider Provider, fn func(*Job)) {
 // GetProviders return a complete list of available providers
 func GetProviders() []Provider {
 	return providers
+}
+
+// Diff represents a diff between two providers
+type Diff struct {
+	Added   []*Job
+	Removed []*Job
+}
+
+// NewDiff creates a diff
+func NewDiff(provider Provider, provider2 Provider) (*Diff, error) {
+	m := make(map[[16]byte]*Job)
+	added := list.New()
+
+	err := provider.RetrieveJobs(func(job *Job) {
+		m[job.Hash()] = job
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = provider2.RetrieveJobs(func(job *Job) {
+		hash := job.Hash()
+		if _, ok := m[hash]; ok {
+			delete(m, hash)
+		} else {
+			added.PushBack(job)
+		}
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	diff := &Diff{}
+
+	diff.Removed = make([]*Job, len(m))
+	i := 0
+	for _, v := range m {
+		diff.Removed[i] = v
+		i++
+	}
+
+	diff.Added = make([]*Job, added.Len())
+	i = 0
+	IterateOver(added, func(job *Job) {
+		diff.Added[i] = job
+		i++
+	})
+
+	return diff, nil
 }
