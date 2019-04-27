@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"container/list"
 	"crypto/md5"
+	"reflect"
 )
 
 // JobType represents a job type, by schedule and by contract
@@ -319,4 +320,20 @@ func NewDiff(provider Provider, provider2 Provider) (*Diff, error) {
 	})
 
 	return diff, nil
+}
+
+// ProviderFromName returns a provider from its name
+func ProviderFromName(name string) Provider {
+	for _, p := range GetProviders() {
+		typ := reflect.TypeOf(p)
+		name := typ.String()[11:]
+		if name[0] == '_' {
+			name = name[1:]
+		}
+
+		if name == name {
+			return p
+		}
+	}
+	return nil
 }
