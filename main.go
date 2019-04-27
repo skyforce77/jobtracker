@@ -32,6 +32,10 @@ func main() {
 
 				for i := 1; i < c.NArg(); i++ {
 					argProv := c.Args()[i]
+					if argProv == "all" {
+						pro = append(pro, providers.GetProviders()...)
+						continue
+					}
 
 					provider := providers.ProviderFromName(argProv)
 					if provider != nil {
@@ -58,6 +62,11 @@ func main() {
 					pro = append(pro, snapshot.NewSnapshot(c.String("snapshot")))
 				}
 				for _, name := range c.Args() {
+					if name == "all" {
+						pro = append(pro, providers.GetProviders()...)
+						continue
+					}
+
 					provider := providers.ProviderFromName(name)
 					if provider != nil {
 						pro = append(pro, provider)
