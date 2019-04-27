@@ -225,6 +225,7 @@ func (job *Job) Hash() [16]byte {
 	b.Write([]byte(job.Title))
 	b.Write([]byte(job.Company))
 	b.Write([]byte(job.Location))
+	b.Write([]byte(job.Link))
 	return md5.Sum(b.Bytes())
 }
 
