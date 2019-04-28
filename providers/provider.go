@@ -327,12 +327,12 @@ func NewDiff(provider Provider, provider2 Provider) (*Diff, error) {
 func ProviderFromName(name string) Provider {
 	for _, p := range GetProviders() {
 		typ := reflect.TypeOf(p)
-		name := typ.String()[11:]
-		if name[0] == '_' {
-			name = name[1:]
+		nam := typ.String()[11:]
+		if nam[0] == '_' {
+			nam = nam[1:]
 		}
 
-		if name == name {
+		if nam == name {
 			return p
 		}
 	}

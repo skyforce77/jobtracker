@@ -45,10 +45,29 @@ func main() {
 					}
 				}
 
+				log.Println("Creating snapshot...")
+
+				cn := make(chan error, 8)
+
 				for _, p := range pro {
-					p.RetrieveJobs(snap.Collector())
+					sp := p
+					go func() {
+						err := sp.RetrieveJobs(snap.Collector())
+						cn <- err
+					}()
 				}
-				snap.Save()
+
+				i := 0
+				for i != len(pro) {
+					err := <-cn
+					log.Printf("Provider finished (%d/%d)\n", i+1, len(pro))
+					if err != nil {
+						log.Printf("Error detected: %s\n", err)
+					}
+					snap.Save()
+					i++
+				}
+				log.Println("Snap", c.Args()[0], "created")
 				return nil
 			},
 		},
