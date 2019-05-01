@@ -170,7 +170,9 @@ func main() {
 
 						for _, j := range diff.Added {
 							for _, dev := range devs {
-								dev.PushLink(j.Title+" - "+j.Company+" - "+j.Location, j.Link, j.Desc)
+								dev.PushLink(j.Title+" - "+j.Company+" - "+j.Location,
+									j.Link,
+									"Click to see more")
 							}
 						}
 
