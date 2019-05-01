@@ -83,18 +83,20 @@ func (civiweb *civiweb) RetrieveJob(fn func(job *Job), title string,
 	intro := doc.Find(".intro-offre").First().Text()
 	text := doc.Find(".txt-offre").First().Text()
 	matches := regex.FindAllStringSubmatch(intro, -1)
-	m := matches[0]
+	if len(matches) > 0 {
+		m := matches[0]
 
-	job.Desc = text
-	job.Location = m[2] + ", " + m[1]
-	job.Company = m[7]
+		job.Desc = text
+		job.Location = m[2] + ", " + m[1]
+		job.Company = m[7]
 
-	job.Misc["start"] = m[3]
-	job.Misc["end"] = m[4]
-	job.Misc["duration"] = m[5] + " " + m[6]
-	job.Misc["salary"] = m[8]
+		job.Misc["start"] = m[3]
+		job.Misc["end"] = m[4]
+		job.Misc["duration"] = m[5] + " " + m[6]
+		job.Misc["salary"] = m[8]
 
-	fn(job)
+		fn(job)
+	}
 	return nil
 }
 

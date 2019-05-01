@@ -108,3 +108,8 @@ func (snapshot *Snapshot) Save() error {
 	err := ioutil.WriteFile(snapshot.file, gb.Bytes(), 0644)
 	return err
 }
+
+// Erase removes every entry of a snapshot
+func (snapshot *Snapshot) Erase() {
+	snapshot.content = list.New()
+}

@@ -5,6 +5,7 @@ import (
 	"./snapshot"
 	"./view"
 	"errors"
+	"github.com/xconstruct/go-pushbullet"
 	"gopkg.in/urfave/cli.v1"
 	"log"
 	"os"
@@ -98,6 +99,88 @@ func main() {
 				cli.StringFlag{
 					Name:  "snapshot, s",
 					Usage: "Load snapshot from `FILE`",
+				},
+			},
+		},
+		{
+			Name:  "notify",
+			Usage: "Notifies updates",
+			Subcommands: []cli.Command{
+				{
+					Name:      "pushbullet",
+					Usage:     "Notifies updates on pushbullet",
+					ArgsUsage: "[pushbullet token] [snap name] [providers]...",
+					Action: func(c *cli.Context) error {
+						original := snapshot.NewSnapshot(c.Args()[1])
+						snap := snapshot.NewSnapshot(c.Args()[1])
+						snap.Erase()
+
+						pro := make([]providers.Provider, 0)
+						if c.IsSet("snapshot") {
+							pro = append(pro, snapshot.NewSnapshot(c.String("snapshot")))
+						}
+						for _, name := range c.Args()[2:] {
+							if name == "all" {
+								pro = append(pro, providers.GetProviders()...)
+								continue
+							}
+
+							provider := providers.ProviderFromName(name)
+							if provider != nil {
+								pro = append(pro, provider)
+							}
+						}
+
+						log.Println("Creating snapshot...")
+
+						cn := make(chan error, 8)
+
+						for _, p := range pro {
+							sp := p
+							go func() {
+								err := sp.RetrieveJobs(snap.Collector())
+								cn <- err
+							}()
+						}
+
+						i := 0
+						for i != len(pro) {
+							err := <-cn
+							log.Printf("Provider finished (%d/%d)\n", i+1, len(pro))
+							if err != nil {
+								log.Printf("Error detected: %s\n", err)
+							}
+							snap.Save()
+							i++
+						}
+						log.Println("Snap", c.Args()[1], "created")
+
+						diff, err := providers.NewDiff(original, snap)
+						if err != nil {
+							return err
+						}
+
+						pb := pushbullet.New(c.Args()[0])
+						devs, err := pb.Devices()
+						if err != nil {
+							panic(err)
+						}
+
+						for _, j := range diff.Added {
+							for _, dev := range devs {
+								dev.PushLink(j.Title+" - "+j.Company+" - "+j.Location, j.Link, j.Desc)
+							}
+						}
+
+						snap.Save()
+						return nil
+					},
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "snapshot, s",
+							Usage: "Load snapshot from `FILE`",
+						},
+					},
 				},
 			},
 		},
