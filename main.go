@@ -166,13 +166,14 @@ func main() {
 							panic(err)
 						}
 
+						snap.Save()
+
 						for _, j := range diff.Added {
 							for _, dev := range devs {
 								dev.PushLink(j.Title+" - "+j.Company+" - "+j.Location, j.Link, j.Desc)
 							}
 						}
 
-						snap.Save()
 						return nil
 					},
 					Flags: []cli.Flag{
