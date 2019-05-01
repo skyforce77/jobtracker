@@ -1,7 +1,6 @@
 package snapshot
 
 import (
-	"../providers"
 	"bytes"
 	"compress/gzip"
 	"container/list"
@@ -9,6 +8,8 @@ import (
 	"io/ioutil"
 	"os"
 	"sync"
+
+	"../providers"
 )
 
 // Snapshot helps you to collect and store your scrapped jobs
@@ -112,4 +113,25 @@ func (snapshot *Snapshot) Save() error {
 // Erase removes every entry of a snapshot
 func (snapshot *Snapshot) Erase() {
 	snapshot.content = list.New()
+}
+
+// CollectFrom a slice of providers
+func (snapshot *Snapshot) CollectFrom(pro []providers.Provider, fn func(int, error)) {
+
+	cn := make(chan error, 8)
+
+	for _, p := range pro {
+		sp := p
+		go func() {
+			err := sp.RetrieveJobs(snapshot.Collector())
+			cn <- err
+		}()
+	}
+
+	i := 0
+	for i != len(pro) {
+		err := <-cn
+		fn(i, err)
+		i++
+	}
 }

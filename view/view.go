@@ -5,6 +5,7 @@ import (
 	"github.com/marcusolsson/tui-go"
 )
 
+// StartView will start a view
 func StartView(pro []providers.Provider) {
 	jobs := tui.NewTable(4, 0)
 
