@@ -7,16 +7,31 @@ import (
 	"strconv"
 )
 
-type civiweb struct{}
+type civiweb struct {
+	latest bool
+}
 
 // NewCiviweb returns a new provider
 func NewCiviweb() Provider {
-	return &civiweb{}
+	return &civiweb{
+		false,
+	}
+}
+
+type civiwebLatest struct {
+	civiweb
+}
+
+// NewCiviwebLatest returns a new provider
+func NewCiviwebLatest() Provider {
+	return &civiwebLatest{
+		civiweb{true},
+	}
 }
 
 const civiwebURL = "https://www.civiweb.com/FR/offre-liste/page/1.aspx"
 
-func (civiweb *civiweb) FindPageCount() (int, error) {
+func (civiweb *civiweb) findPageCount() (int, error) {
 	res, err := http.Get("https://www.civiweb.com/FR/offre-liste/page/1.aspx")
 	if err != nil {
 		return 0, err
@@ -56,7 +71,7 @@ func (civiweb *civiweb) FindPageCount() (int, error) {
 	return i, nil
 }
 
-func (civiweb *civiweb) RetrieveJob(fn func(job *Job), title string,
+func (civiweb *civiweb) retrieveJob(fn func(job *Job), title string,
 	url string, regex *regexp.Regexp) error {
 
 	res, err := http.Get(url)
@@ -100,13 +115,47 @@ func (civiweb *civiweb) RetrieveJob(fn func(job *Job), title string,
 	return nil
 }
 
-func (civiweb *civiweb) RetrieveJobs(fn func(job *Job)) error {
-	count, err := civiweb.FindPageCount()
+func (civiweb *civiweb) retrieveLastJobs(fn func(job *Job), regex *regexp.Regexp) error {
+	res, err := http.Get("https://www.civiweb.com/FR/index.aspx")
 	if err != nil {
 		return err
 	}
 
+	if res.StatusCode != 200 {
+		return handleStatus(res)
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		return err
+	}
+
+	doc.Find(".last-offers ul li a").Each(func(j int, s *goquery.Selection) {
+		url, ok := s.Attr("href")
+		if !ok {
+			return
+		}
+
+		err := civiweb.retrieveJob(fn, s.Text(),
+			"https://www.civiweb.com"+url, regex)
+		if err != nil {
+			panic(err)
+		}
+	})
+	return nil
+}
+
+func (civiweb *civiweb) RetrieveJobs(fn func(job *Job)) error {
 	detailsLinkRegex, err := regexp.Compile(`([a-zA-Z]+)\n +\((.+)\)\n +du\n +(.+)\n +au\n +(.+)\n +\(pour\n +(.+)\n +(.+)\)\n +ETABLISSEMENT :\n +(.+)\n +REMUNERATION MENSUELLE :\n +(.+)€`)
+	if err != nil {
+		return err
+	}
+
+	if civiweb.latest {
+		return civiweb.retrieveLastJobs(fn, detailsLinkRegex)
+	}
+
+	count, err := civiweb.findPageCount()
 	if err != nil {
 		return err
 	}
@@ -132,7 +181,7 @@ func (civiweb *civiweb) RetrieveJobs(fn func(job *Job)) error {
 				return
 			}
 
-			err := civiweb.RetrieveJob(fn, s.Text(),
+			err := civiweb.retrieveJob(fn, s.Text(),
 				"https://www.civiweb.com"+url, detailsLinkRegex)
 			if err != nil {
 				panic(err)

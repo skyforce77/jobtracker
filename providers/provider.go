@@ -190,6 +190,7 @@ var (
 		NewOseberg(),
 		NewPeek(),
 		NewCiviweb(),
+		NewCiviwebLatest(),
 	}
 )
 

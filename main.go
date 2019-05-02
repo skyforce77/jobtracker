@@ -168,9 +168,9 @@ func actionPushBullet(c *cli.Context) error {
 
 	for _, j := range diff.Added {
 		for _, dev := range devs {
-			dev.PushLink(j.Title+" - "+j.Company+" - "+j.Location,
+			dev.PushLink("Job offer alert",
 				j.Link,
-				"Click to see more")
+				j.Title+" - "+j.Company+" - "+j.Location)
 		}
 	}
 
