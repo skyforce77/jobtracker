@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/gregdel/pushover"
 	"log"
 	"os"
 	"sort"
@@ -48,6 +49,18 @@ func main() {
 					Usage:     "Notifies updates on pushbullet",
 					ArgsUsage: "[pushbullet token] [snap name] [providers]...",
 					Action:    actionPushBullet,
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "snapshot, s",
+							Usage: "Load snapshot from `FILE`",
+						},
+					},
+				},
+				{
+					Name:      "pushover",
+					Usage:     "Notifies updates on pushover",
+					ArgsUsage: "[api token] [user token] [snap name] [providers]...",
+					Action:    actionPushOver,
 					Flags: []cli.Flag{
 						cli.StringFlag{
 							Name:  "snapshot, s",
@@ -168,9 +181,68 @@ func actionPushBullet(c *cli.Context) error {
 
 	for _, j := range diff.Added {
 		for _, dev := range devs {
-			dev.PushLink("Job offer alert",
+			err := dev.PushLink("Job offer alert",
 				j.Link,
 				j.Title+" - "+j.Company+" - "+j.Location)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func actionPushOver(c *cli.Context) error {
+	original := snapshot.NewSnapshot(c.Args()[2])
+	snap := snapshot.NewSnapshot(c.Args()[2])
+	snap.Erase()
+
+	pro := make([]providers.Provider, 0)
+	if c.IsSet("snapshot") {
+		pro = append(pro, snapshot.NewSnapshot(c.String("snapshot")))
+	}
+	for _, name := range c.Args()[3:] {
+		if name == "all" {
+			pro = append(pro, providers.GetProviders()...)
+			continue
+		}
+
+		provider := providers.ProviderFromName(name)
+		if provider != nil {
+			pro = append(pro, provider)
+		}
+	}
+
+	log.Println("Creating snapshot...")
+	snap.CollectFrom(pro, func(i int, err error) {
+		log.Printf("Provider finished (%d/%d)\n", i+1, len(pro))
+		if err != nil {
+			log.Printf("Error detected: %s\n", err)
+		}
+		snap.Save()
+	})
+
+	log.Println("Snap", c.Args()[2], "created")
+
+	diff, err := providers.NewDiff(original, snap)
+	if err != nil {
+		return err
+	}
+
+	app := pushover.New(c.Args()[0])
+	recipient := pushover.NewRecipient(c.Args()[1])
+
+	snap.Save()
+
+	for _, j := range diff.Added {
+		message := pushover.NewMessageWithTitle(j.Title+" - "+j.Company+" - "+j.Location,
+			"Job offer alert")
+		message.URL = j.Link
+
+		_, err := app.SendMessage(message, recipient)
+		if err != nil {
+			log.Panic(err)
 		}
 	}
 
