@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 type civiweb struct {
@@ -136,7 +137,7 @@ func (civiweb *civiweb) retrieveLastJobs(fn func(job *Job), regex *regexp.Regexp
 			return
 		}
 
-		err := civiweb.retrieveJob(fn, s.Text(),
+		err := civiweb.retrieveJob(fn, strings.TrimSpace(strings.Split(s.Text(), "\n")[1]),
 			"https://www.civiweb.com"+url, regex)
 		if err != nil {
 			panic(err)
