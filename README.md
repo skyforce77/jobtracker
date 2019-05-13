@@ -4,7 +4,41 @@
 [![](https://godoc.org/github.com/IDerr/jobtracker/providers?status.svg)](https://godoc.org/github.com/IDerr/jobtracker/providers)
 
 JobTracker aims to help you find your future dream job.
-You can use our library to scrap and export jobs from 150+ providers.
+You can also use our library to scrap and export jobs from 150+ providers.
+
+## Runnable software
+
+### Compile
+
+```shell
+git clone https://github.com/IDerr/jobtracker.git
+cd jobtracker
+go get ./...
+go build
+```
+
+### Notify
+
+Jobtracker provides an easy way to track job offers.
+Here is an example with Pushover. Discord and Pushbullet are also supported. See jobtracker help for more information
+
+```shell
+jobtracker notify pushover <token> <user> civiwebLatest.snap civiwebLatest
+```
+
+Just add this command to a crontab task, and voilà ! You'll get notified each time a job is added to the list
+
+```shell
+*/10 * * * * jobtracker notify pushover <token> <user> civiwebLatest.snap civiwebLatest
+```
+
+You can specify a list of providers to track multiple providers at the same time
+
+```shell
+jobtracker notify pushover <token> <user> civiwebLatest.snap civiwebLatest disney amazon netflix
+```
+
+## Library
 
 ### How to use
 Example finding Netflix jobs
