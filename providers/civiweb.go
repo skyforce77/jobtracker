@@ -147,7 +147,7 @@ func (civiweb *civiweb) retrieveLastJobs(fn func(job *Job), regex *regexp.Regexp
 }
 
 func (civiweb *civiweb) RetrieveJobs(fn func(job *Job)) error {
-	detailsLinkRegex, err := regexp.Compile(`([a-zA-Z]+)\n +\((.+)\)\n +du\n +(.+)\n +au\n +(.+)\n +\(pour\n +(.+)\n +(.+)\)\n +ETABLISSEMENT :\n +(.+)\n +REMUNERATION MENSUELLE :\n +(.+)€`)
+	detailsLinkRegex, err := regexp.Compile(`\s*(.+)\n +\((.+)\)\n +du\n +(.+)\n +au\n +(.+)\n +\(pour\n +(.+)\n +(.+)\)\n +ETABLISSEMENT :\n +(.+)\n +REMUNERATION MENSUELLE :\n +(.+)€`)
 	if err != nil {
 		return err
 	}
