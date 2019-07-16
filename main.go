@@ -1,18 +1,17 @@
 package main
 
 import (
+	"./discord"
+	"./print"
+	"./providers"
+	"./snapshot"
 	"errors"
 	"github.com/gregdel/pushover"
+	"github.com/xconstruct/go-pushbullet"
+	"gopkg.in/urfave/cli.v1"
 	"log"
 	"os"
 	"sort"
-
-	"./discord"
-	"./providers"
-	"./snapshot"
-	"./view"
-	"github.com/xconstruct/go-pushbullet"
-	"gopkg.in/urfave/cli.v1"
 )
 
 func main() {
@@ -29,14 +28,18 @@ func main() {
 			Action:    actionSnap,
 		},
 		{
-			Name:      "view",
-			Usage:     "View available jobs",
+			Name:      "print",
+			Usage:     "Print available jobs",
 			ArgsUsage: "[providers]...",
-			Action:    actionView,
+			Action:    actionList,
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "snapshot, s",
 					Usage: "Load snapshot from `FILE`",
+				},
+				cli.BoolTFlag{
+					Name:  "pretty, p",
+					Usage: "Prints in a pretty way",
 				},
 			},
 		},
@@ -249,7 +252,7 @@ func actionPushOver(c *cli.Context) error {
 	return nil
 }
 
-func actionView(c *cli.Context) error {
+func actionList(c *cli.Context) error {
 	pro := make([]providers.Provider, 0)
 	if c.IsSet("snapshot") {
 		pro = append(pro, snapshot.NewSnapshot(c.String("snapshot")))
@@ -265,7 +268,8 @@ func actionView(c *cli.Context) error {
 			pro = append(pro, provider)
 		}
 	}
-	view.StartView(pro)
+	pretty := c.Bool("pretty")
+	print.Print(pro, pretty)
 	return nil
 }
 
@@ -299,6 +303,9 @@ func actionSnap(c *cli.Context) error {
 	for _, p := range pro {
 		sp := p
 		go func() {
+			if sp == nil {
+				return
+			}
 			err := sp.RetrieveJobs(snap.Collector())
 			cn <- err
 		}()

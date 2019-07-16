@@ -82,10 +82,8 @@ func (snapshot *Snapshot) Collector() func(job *providers.Job) {
 func (snapshot *Snapshot) Save() error {
 	arr := make([]*providers.Job, snapshot.content.Len())
 
-	i := 0
 	providers.IterateOver(snapshot.content, func(job *providers.Job) {
-		arr[i] = job
-		i++
+		arr = append(arr, job)
 	})
 
 	var b bytes.Buffer
