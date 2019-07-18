@@ -5,12 +5,14 @@ import (
 	"./print"
 	"./providers"
 	"./snapshot"
+	"./util"
 	"errors"
 	"github.com/gregdel/pushover"
 	"github.com/xconstruct/go-pushbullet"
 	"gopkg.in/urfave/cli.v1"
 	"log"
 	"os"
+	"reflect"
 	"sort"
 )
 
@@ -31,7 +33,7 @@ func main() {
 			Name:      "print",
 			Usage:     "Print available jobs",
 			ArgsUsage: "[providers]...",
-			Action:    actionList,
+			Action:    actionPrint,
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "snapshot, s",
@@ -40,6 +42,10 @@ func main() {
 				cli.BoolTFlag{
 					Name:  "pretty, p",
 					Usage: "Prints in a pretty way",
+				},
+				cli.StringFlag{
+					Name:  "filter, f",
+					Usage: "Filters from `LUA_FILE`",
 				},
 			},
 		},
@@ -57,6 +63,10 @@ func main() {
 							Name:  "snapshot, s",
 							Usage: "Load snapshot from `FILE`",
 						},
+						cli.StringFlag{
+							Name:  "filter, f",
+							Usage: "Filters from `LUA_FILE`",
+						},
 					},
 				},
 				{
@@ -69,6 +79,10 @@ func main() {
 							Name:  "snapshot, s",
 							Usage: "Load snapshot from `FILE`",
 						},
+						cli.StringFlag{
+							Name:  "filter, f",
+							Usage: "Filters from `LUA_FILE`",
+						},
 					},
 				},
 				{
@@ -80,6 +94,10 @@ func main() {
 						cli.StringFlag{
 							Name:  "snapshot, s",
 							Usage: "Load snapshot from `FILE`",
+						},
+						cli.StringFlag{
+							Name:  "filter, f",
+							Usage: "Filters from `LUA_FILE`",
 						},
 					},
 				},
@@ -116,11 +134,16 @@ func actionDiscord(c *cli.Context) error {
 		}
 	}
 
+	collector := snap.Collector()
+	if c.IsSet("filter") {
+		collector = util.Filter(c.String("filter"), collector)
+	}
+
 	log.Println("Creating snapshot...")
-	snap.CollectFrom(pro, func(i int, err error) {
+	snap.CollectFrom(pro, collector, func(i int, err *snapshot.ProviderFailure) {
 		log.Printf("Provider finished (%d/%d)\n", i+1, len(pro))
-		if err != nil {
-			log.Printf("Error detected: %s\n", err)
+		if err.Error != nil {
+			log.Printf("Error detected %s: %s\n", reflect.TypeOf(err.Provider), err.Error)
 		}
 		snap.Save()
 	})
@@ -159,10 +182,16 @@ func actionPushBullet(c *cli.Context) error {
 	}
 
 	log.Println("Creating snapshot...")
-	snap.CollectFrom(pro, func(i int, err error) {
+
+	collector := snap.Collector()
+	if c.IsSet("filter") {
+		collector = util.Filter(c.String("filter"), collector)
+	}
+
+	snap.CollectFrom(pro, collector, func(i int, err *snapshot.ProviderFailure) {
 		log.Printf("Provider finished (%d/%d)\n", i+1, len(pro))
-		if err != nil {
-			log.Printf("Error detected: %s\n", err)
+		if err.Error != nil {
+			log.Printf("Error detected %s: %s\n", reflect.TypeOf(*err.Provider).String(), err.Error)
 		}
 		snap.Save()
 	})
@@ -217,11 +246,16 @@ func actionPushOver(c *cli.Context) error {
 		}
 	}
 
+	collector := snap.Collector()
+	if c.IsSet("filter") {
+		collector = util.Filter(c.String("filter"), collector)
+	}
+
 	log.Println("Creating snapshot...")
-	snap.CollectFrom(pro, func(i int, err error) {
+	snap.CollectFrom(pro, collector, func(i int, err *snapshot.ProviderFailure) {
 		log.Printf("Provider finished (%d/%d)\n", i+1, len(pro))
-		if err != nil {
-			log.Printf("Error detected: %s\n", err)
+		if err.Error != nil {
+			log.Printf("Error detected %s: %s\n", reflect.TypeOf(*err.Provider).String(), err.Error)
 		}
 		snap.Save()
 	})
@@ -252,7 +286,7 @@ func actionPushOver(c *cli.Context) error {
 	return nil
 }
 
-func actionList(c *cli.Context) error {
+func actionPrint(c *cli.Context) error {
 	pro := make([]providers.Provider, 0)
 	if c.IsSet("snapshot") {
 		pro = append(pro, snapshot.NewSnapshot(c.String("snapshot")))
@@ -268,8 +302,15 @@ func actionList(c *cli.Context) error {
 			pro = append(pro, provider)
 		}
 	}
+
+	var filter *string = nil
+	if c.IsSet("filter") {
+		f := c.String("filter")
+		filter = &f
+	}
+
 	pretty := c.Bool("pretty")
-	print.Print(pro, pretty)
+	print.Print(pro, pretty, filter)
 	return nil
 }
 
@@ -298,7 +339,7 @@ func actionSnap(c *cli.Context) error {
 
 	log.Println("Creating snapshot...")
 
-	cn := make(chan error, 8)
+	cn := make(chan *snapshot.ProviderFailure, 8)
 
 	for _, p := range pro {
 		sp := p
@@ -306,7 +347,7 @@ func actionSnap(c *cli.Context) error {
 			if sp == nil {
 				return
 			}
-			err := sp.RetrieveJobs(snap.Collector())
+			err := &snapshot.ProviderFailure{&sp, sp.RetrieveJobs(snap.Collector())}
 			cn <- err
 		}()
 	}
@@ -315,10 +356,13 @@ func actionSnap(c *cli.Context) error {
 	for i != len(pro) {
 		err := <-cn
 		log.Printf("Provider finished (%d/%d)\n", i+1, len(pro))
-		if err != nil {
-			log.Printf("Error detected: %s\n", err)
+		if err.Error != nil {
+			log.Printf("Error detected %s: %s\n", reflect.TypeOf(*err.Provider).String(), err.Error)
 		}
-		snap.Save()
+		errn := snap.Save()
+		if errn != nil {
+			log.Printf("Error detected : %s\n", errn)
+		}
 		i++
 	}
 	log.Println("Snap", c.Args()[0], "created")

@@ -19,6 +19,12 @@ type Snapshot struct {
 	lock    sync.Mutex
 }
 
+// ProviderFailure refers to an error occurred in a provider
+type ProviderFailure struct {
+	Provider *providers.Provider
+	Error error
+}
+
 // RetrieveJobs replays your snapshot jobs
 func (snapshot *Snapshot) RetrieveJobs(fn func(job *providers.Job)) error {
 	node := snapshot.content.Front()
@@ -80,7 +86,7 @@ func (snapshot *Snapshot) Collector() func(job *providers.Job) {
 
 // Save compresses your collected data and saves it
 func (snapshot *Snapshot) Save() error {
-	arr := make([]*providers.Job, snapshot.content.Len())
+	var arr []*providers.Job
 
 	providers.IterateOver(snapshot.content, func(job *providers.Job) {
 		arr = append(arr, job)
@@ -114,15 +120,15 @@ func (snapshot *Snapshot) Erase() {
 }
 
 // CollectFrom a slice of providers
-func (snapshot *Snapshot) CollectFrom(pro []providers.Provider, fn func(int, error)) {
+func (snapshot *Snapshot) CollectFrom(pro []providers.Provider, collector func(job *providers.Job), fn func(int, *ProviderFailure)) {
 
-	cn := make(chan error, 8)
+	cn := make(chan *ProviderFailure, 8)
 
 	for _, p := range pro {
 		sp := p
 		go func() {
-			err := sp.RetrieveJobs(snapshot.Collector())
-			cn <- err
+			err := sp.RetrieveJobs(collector)
+			cn <- &ProviderFailure{&p, err}
 		}()
 	}
 

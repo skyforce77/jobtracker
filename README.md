@@ -38,6 +38,34 @@ You can specify a list of providers to track multiple providers at the same time
 jobtracker notify pushover <token> <user> civiwebLatest.snap civiwebLatest disney amazon netflix
 ```
 
+### Print
+
+The print command allows you to print the content of a snapshot or directly pulling data from any available provider.
+
+```shell
+jobtracker print [provider]...
+```
+
+### Filtering
+
+You are also able to filter data from an external lua script.
+Let's try with this 'test.lua' file
+
+```lua
+function filter(job)
+	lower = string.lower(job.title)
+	if string.match(lower, "data") == "data" then
+		return true
+	end
+	return false
+end
+```
+
+This command will then filter jobs from Disney and print only those whose title contains 'data'
+```shell
+jobtracker print -f=test.lua disney
+```
+
 ## Library
 
 ### How to use
