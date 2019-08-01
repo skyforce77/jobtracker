@@ -54,10 +54,7 @@ Let's try with this 'test.lua' file
 ```lua
 function filter(job)
 	lower = string.lower(job.title)
-	if string.match(lower, "data") == "data" then
-		return true
-	end
-	return false
+	return string.match(lower, "data") == "data"
 end
 ```
 
