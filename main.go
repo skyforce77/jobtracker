@@ -8,6 +8,7 @@ import (
 	"./util"
 	"errors"
 	"github.com/gregdel/pushover"
+	"github.com/hearkat/hearkat-go"
 	"github.com/xconstruct/go-pushbullet"
 	"gopkg.in/urfave/cli.v1"
 	"log"
@@ -74,6 +75,22 @@ func main() {
 					Usage:     "Notifies updates on pushover",
 					ArgsUsage: "[api token] [user token] [snap name] [providers]...",
 					Action:    actionPushOver,
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "snapshot, s",
+							Usage: "Load snapshot from `FILE`",
+						},
+						cli.StringFlag{
+							Name:  "filter, f",
+							Usage: "Filters from `LUA_FILE`",
+						},
+					},
+				},
+				{
+					Name:      "hearkat",
+					Usage:     "Notifies updates on hearkat",
+					ArgsUsage: "[user token] [access token] [channel] [snap name] [providers]...",
+					Action:    actionHearkat,
 					Flags: []cli.Flag{
 						cli.StringFlag{
 							Name:  "snapshot, s",
@@ -278,6 +295,78 @@ func actionPushOver(c *cli.Context) error {
 		message.URL = j.Link
 
 		_, err := app.SendMessage(message, recipient)
+		if err != nil {
+			log.Panic(err)
+		}
+	}
+
+	return nil
+}
+
+func actionHearkat(c *cli.Context) error {
+	original := snapshot.NewSnapshot(c.Args()[3])
+	snap := snapshot.NewSnapshot(c.Args()[3])
+	snap.Erase()
+
+	pro := make([]providers.Provider, 0)
+	if c.IsSet("snapshot") {
+		pro = append(pro, snapshot.NewSnapshot(c.String("snapshot")))
+	}
+	for _, name := range c.Args()[4:] {
+		if name == "all" {
+			pro = append(pro, providers.GetProviders()...)
+			continue
+		}
+
+		provider := providers.ProviderFromName(name)
+		if provider != nil {
+			pro = append(pro, provider)
+		}
+	}
+
+	collector := snap.Collector()
+	if c.IsSet("filter") {
+		collector = util.Filter(c.String("filter"), collector)
+	}
+
+	log.Println("Creating snapshot...")
+	snap.CollectFrom(pro, collector, func(i int, err *snapshot.ProviderFailure) {
+		log.Printf("Provider finished (%d/%d)\n", i+1, len(pro))
+		if err.Error != nil {
+			log.Printf("Error detected %s: %s\n", reflect.TypeOf(*err.Provider).String(), err.Error)
+		}
+		snap.Save()
+	})
+
+	log.Println("Snap", c.Args()[3], "created")
+
+	diff, err := providers.NewDiff(original, snap)
+	if err != nil {
+		return err
+	}
+
+	app := hearkat.NewClient(c.Args()[0], c.Args()[1])
+	channel := c.Args()[2]
+
+	snap.Save()
+
+	for _, j := range diff.Added {
+		message := &hearkat.Message{
+			Notification: &hearkat.Notification{
+				Title:   "Job offer alert",
+				Message: j.Title + " - " + j.Company + " - " + j.Location,
+				Link:    &j.Link,
+			},
+			Job: j.ToHearkat(),
+			Metadata: &hearkat.Metadata{
+				"producer": "jobtracker",
+			},
+			Tags: &hearkat.Tags{
+				"job",
+			},
+		}
+
+		err := app.Push(channel, message)
 		if err != nil {
 			log.Panic(err)
 		}
