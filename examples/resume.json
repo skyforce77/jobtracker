@@ -1,0 +1,102 @@
+{
+  "basics": {
+    "name": "John Doe",
+    "label": "Senior Software Engineer",
+    "email": "john.doe@example.com",
+    "phone": "+1-555-123-4567",
+    "url": "https://johndoe.dev",
+    "summary": "Experienced software engineer with 8+ years building scalable web applications and distributed systems.",
+    "location": {
+      "city": "San Francisco",
+      "countryCode": "US",
+      "region": "California"
+    },
+    "profiles": [
+      {
+        "network": "LinkedIn",
+        "username": "johndoe",
+        "url": "https://linkedin.com/in/johndoe"
+      },
+      {
+        "network": "GitHub",
+        "username": "johndoe",
+        "url": "https://github.com/johndoe"
+      }
+    ]
+  },
+  "work": [
+    {
+      "name": "Tech Corp",
+      "position": "Senior Software Engineer",
+      "url": "https://techcorp.example.com",
+      "startDate": "2020-01-01",
+      "summary": "Led development of microservices architecture serving 10M+ users",
+      "highlights": [
+        "Designed and implemented event-driven architecture",
+        "Reduced API latency by 60%",
+        "Mentored team of 5 junior engineers"
+      ],
+      "location": "San Francisco, CA"
+    },
+    {
+      "name": "StartupXYZ",
+      "position": "Software Engineer",
+      "startDate": "2017-03-01",
+      "endDate": "2019-12-31",
+      "summary": "Full-stack development for B2B SaaS platform",
+      "highlights": [
+        "Built real-time collaboration features",
+        "Implemented CI/CD pipeline"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "University of California",
+      "area": "Computer Science",
+      "studyType": "Bachelor",
+      "startDate": "2013-09-01",
+      "endDate": "2017-05-01"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Backend Development",
+      "level": "Expert",
+      "keywords": ["Go", "Python", "Node.js", "REST API", "GraphQL", "gRPC"]
+    },
+    {
+      "name": "Frontend Development",
+      "level": "Advanced",
+      "keywords": ["React", "TypeScript", "JavaScript", "HTML", "CSS"]
+    },
+    {
+      "name": "Infrastructure",
+      "level": "Advanced",
+      "keywords": ["AWS", "Docker", "Kubernetes", "Terraform", "CI/CD"]
+    },
+    {
+      "name": "Databases",
+      "level": "Advanced",
+      "keywords": ["PostgreSQL", "MongoDB", "Redis", "Elasticsearch"]
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "fluency": "Native"
+    },
+    {
+      "language": "French",
+      "fluency": "Professional"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Open Source Contribution",
+      "description": "Major contributor to popular Go libraries",
+      "keywords": ["Go", "Open Source"],
+      "url": "https://github.com/johndoe/project"
+    }
+  ]
+}

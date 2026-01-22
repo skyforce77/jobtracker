@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"../providers"
-	"../snapshot"
 	"github.com/bwmarrin/discordgo"
+	"github.com/skyforce77/jobtracker/providers"
+	"github.com/skyforce77/jobtracker/snapshot"
 )
 
 // SendAndForget creates a discord client and send new jobs offer

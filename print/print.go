@@ -1,12 +1,13 @@
 package print
 
 import (
-	"../providers"
-	"../util"
 	"container/list"
+	"fmt"
 	"strings"
 	"unicode/utf8"
-	"fmt"
+
+	"github.com/skyforce77/jobtracker/providers"
+	"github.com/skyforce77/jobtracker/util"
 )
 
 // Print will print jobs

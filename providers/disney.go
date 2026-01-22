@@ -3,7 +3,7 @@ package providers
 import (
 	"encoding/json"
 	"github.com/PuerkitoBio/goquery"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -68,7 +68,7 @@ func (disney *disney) readPage(page int, search *disneySearch, fn func(job *Job)
 		return handleStatus(res)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}

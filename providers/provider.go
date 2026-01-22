@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"container/list"
 	"crypto/md5"
-	"github.com/hearkat/hearkat-go"
 	"reflect"
 )
 
@@ -24,174 +23,52 @@ const (
 
 var (
 	providers = []Provider{
-		New3M(),
-		NewAdobe(),
-		NewAmazon(),
-		NewBabylist(),
-		NewBetclic(),
-		NewBlizzard(),
-		NewCarta(),
-		NewConfluent(),
-		NewCoursera(),
-		NewDell(),
-		NewDisney(),
-		NewDoctrine(),
-		NewDukeEnergy(),
-		NewERM(),
-		NewEventBrite(),
-		NewFico(),
-		NewFlextronics(),
-		NewGamestop(),
+		NewOpenAI(),
+		NewNotion(),
+		NewRamp(),
+		NewLinear(),
+		NewDeel(),
 		NewGreenhouse(),
-		NewGumGum(),
-		NewHottopic(),
-		NewJourny(),
-		NewKering(),
-		NewKickStarter(),
-		NewLever(),
-		NewLinuxFoundation(),
-		NewLogitech(),
-		NewMastercard(),
-		NewMedium(),
-		NewNetflix(),
-		NewNintendo(),
-		NewNpmjs(),
-		NewUniversityOfNevadaReno(),
-		NewNYTimes(),
-		NewOath(),
-		NewOutreach(),
-		NewPaloAltoNetworks(),
-		NewPokemon(),
-		NewRollsRoyce(),
-		NewRosettaStone(),
-		NewSalesforce(),
-		NewSamsung(),
-		NewSanofi(),
-		NewScribd(),
-		NewSoundcloud(),
-		NewStrait(),
-		NewThales(),
-		NewTrafigura(),
-		NewTrainline(),
-		NewTwitch(),
-		NewTwitter(),
-		NewUniversityOfChicago(),
-		NewVinted(),
-		NewWhittard(),
-		NewWorkday(),
-		NewGithub(),
-		NewLookout(),
-		NewDigitalOcean(),
-		NewTripAdvisor(),
-		NewFitbit(),
 		NewAirbnb(),
-		NewEvernote(),
+		NewTwitch(),
 		NewTwilio(),
 		NewPinterest(),
-		NewVimeo(),
-		NewSurveymonkey(),
-		NewDocusign(),
-		NewCasper(),
-		NewMetromile(),
+		NewMongoDB(),
+		NewInterCom(),
 		NewSquarespace(),
+		NewFigma(),
+		NewStripe(),
+		NewDiscord(),
+		NewCoinbase(),
+		NewAnthropic(),
+		NewNetflix(),
+		NewAdobe(),
+		NewAmazon(),
+		NewBlizzard(),
+		NewConfluent(),
+		NewCoursera(),
+		NewDisney(),
+		NewKickStarter(),
+		NewLinuxFoundation(),
+		NewLogitech(),
+		NewNintendo(),
+		NewSalesforce(),
+		NewUnity(),
+		NewDigitalOcean(),
+		NewDocusign(),
 		NewNerdwallet(),
 		NewBuzzfeed(),
-		NewThumbtack(),
-		NewExpa(),
-		NewCarousell(),
-		NewClassy(),
-		NewThumbtack(),
-		NewLob(),
-		NewHandshake(),
-		NewClassPass(),
-		NewGenius(),
-		NewCuralate(),
 		NewQualtrics(),
-		NewEnvato(),
-		NewPocketGems(),
 		NewIbotta(),
-		NewInterCom(),
-		NewMassdrop(),
-		NewGusto(),
-		NewPayoff(),
-		NewGranular(),
-		NewZype(),
-		NewSmarkets(),
-		NewImoDotIm(),
-		NewWistia(),
-		NewDoorDash(),
-		NewWarbyParker(),
 		NewStrava(),
-		NewVirtaHealth(),
 		NewPureStorage(),
-		NewTrackMaven(),
-		NewStackCommerce(),
-		NewPatreon(),
-		NewTwilio(),
-		NewSignpost(),
-		NewBonobos(),
 		NewBox(),
-		NewBritAndCo(),
-		NewKespry(),
-		NewSimpleFinance(),
-		NewPostmates(),
-		NewOmadaHealth(),
-		NewChartboost(),
 		NewCourseHero(),
-		NewJWPlayer(),
 		NewMixpanel(),
-		NewCarvana(),
-		NewMongoDB(),
-		NewJauntVR(),
-		NewCommerceHub(),
-		NewUnity(),
-		NewSpredfast(),
-		NewQuantifind(),
-		NewJustworks(),
-		NewSplash(),
-		NewMagnetic(),
-		NewAgoda(),
-		NewEero(),
-		NewNetskope(),
-		NewBlockchain(),
-		NewPDTPartners(),
 		NewRapid7(),
-		NewGiphy(),
-		NewMagicLeap(),
-		NewAppLovin(),
-		NewShipHawk(),
-		NewTripAdvisor(),
-		NewPindrop(),
-		NewTakealot(),
-		NewTheWorkingGroup(),
-		NewTheSourcery(),
-		NewCampaignMonitor(),
-		NewRallyHealth(),
-		NewPersado(),
-		NewVaynerMedia(),
-		NewPager(),
-		NewPicarro(),
-		NewBeekeeper(),
-		NewBooking(),
-		NewNoom(),
-		NewDigitalOcean(),
-		NewSkookum(),
-		NewHelix(),
 		NewMalwarebytes(),
-		NewBraintree(),
-		NewPager(),
-		NewPiktochart(),
-		NewCoupang(),
-		NewZanbato(),
-		NewCurrent(),
-		NewEmbark(),
-		NewClimb(),
-		NewTrueMotion(),
-		NewTeralytics(),
-		NewOseberg(),
-		NewPeek(),
-		NewCiviweb(),
-		NewCiviwebLatest(),
+		NewLever(),
+		NewSpotify(),
 	}
 )
 
@@ -237,6 +114,35 @@ type Provider interface {
 	//
 	// This call is blocking and calling the function argument synchronously
 	RetrieveJobs(func(job *Job)) error
+}
+
+// ApplicationRequest contains the data needed to apply for a job
+type ApplicationRequest struct {
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Email        string `json:"email"`
+	Phone        string `json:"phone,omitempty"`
+	Resume       []byte `json:"resume,omitempty"`
+	ResumeURL    string `json:"resume_url,omitempty"`
+	CoverLetter  string `json:"cover_letter,omitempty"`
+	LinkedIn     string `json:"linkedin,omitempty"`
+	Website      string `json:"website,omitempty"`
+	Location     string `json:"location,omitempty"`
+	CustomFields map[string]string `json:"custom_fields,omitempty"`
+}
+
+// ApplicationResult contains the response from a job application
+type ApplicationResult struct {
+	Success       bool   `json:"success"`
+	ApplicationID string `json:"application_id,omitempty"`
+	Message       string `json:"message,omitempty"`
+	Error         string `json:"error,omitempty"`
+}
+
+// Applicant is an optional interface that providers can implement
+// to support automatic job applications
+type Applicant interface {
+	ApplyToJob(jobURL string, req *ApplicationRequest) (*ApplicationResult, error)
 }
 
 // Collect helps you recovering a list of jobs from a Provider
@@ -341,15 +247,3 @@ func ProviderFromName(name string) Provider {
 	return nil
 }
 
-// ToHearkat converts the job
-func (job *Job) ToHearkat() *hearkat.Job {
-	return &hearkat.Job {
-		job.Title,
-		job.Company,
-		job.Location,
-		job.Type,
-		job.Desc,
-		job.Link,
-		job.Misc,
-	}
-}
