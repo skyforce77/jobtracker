@@ -5,10 +5,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/skyforce77/jobtracker/pkg/resume"
 	"github.com/skyforce77/jobtracker/providers"
+)
+
+var (
+	currentResume *resume.Resume
+	resumeMutex   sync.RWMutex
 )
 
 func main() {
@@ -55,6 +62,52 @@ func main() {
 	)
 
 	s.AddTool(getProviderJobsTool, getProviderJobsHandler)
+
+	// Tool: load_resume
+	loadResumeTool := mcp.NewTool("load_resume",
+		mcp.WithDescription("Load a JSON Resume from a file path. The resume will be stored in memory for job matching."),
+		mcp.WithString("path",
+			mcp.Required(),
+			mcp.Description("Path to the JSON Resume file"),
+		),
+	)
+
+	s.AddTool(loadResumeTool, loadResumeHandler)
+
+	// Tool: set_resume
+	setResumeTool := mcp.NewTool("set_resume",
+		mcp.WithDescription("Set resume data directly from JSON content"),
+		mcp.WithString("json",
+			mcp.Required(),
+			mcp.Description("JSON Resume content as a string"),
+		),
+	)
+
+	s.AddTool(setResumeTool, setResumeHandler)
+
+	// Tool: get_resume
+	getResumeTool := mcp.NewTool("get_resume",
+		mcp.WithDescription("Get the currently loaded resume"),
+	)
+
+	s.AddTool(getResumeTool, getResumeHandler)
+
+	// Tool: match_jobs
+	matchJobsTool := mcp.NewTool("match_jobs",
+		mcp.WithDescription("Find jobs that match the loaded resume skills"),
+		mcp.WithString("providers",
+			mcp.Required(),
+			mcp.Description("Comma-separated list of provider names or 'all'"),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Maximum number of results (default: 20)"),
+		),
+		mcp.WithNumber("min_score",
+			mcp.Description("Minimum match score 0-1 (default: 0.1)"),
+		),
+	)
+
+	s.AddTool(matchJobsTool, matchJobsHandler)
 
 	// Start the server
 	if err := server.ServeStdio(s); err != nil {
@@ -183,4 +236,135 @@ func getProviderName(p providers.Provider) string {
 	// Remove pointer prefix
 	name = strings.TrimPrefix(name, "*")
 	return name
+}
+
+func loadResumeHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	path := request.GetString("path", "")
+
+	r, err := resume.LoadFromFile(path)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to load resume: %v", err)), nil
+	}
+
+	if errors := r.Validate(); len(errors) > 0 {
+		return mcp.NewToolResultError(fmt.Sprintf("Resume validation errors: %v", errors)), nil
+	}
+
+	resumeMutex.Lock()
+	currentResume = r
+	resumeMutex.Unlock()
+
+	return mcp.NewToolResultText(fmt.Sprintf("Resume loaded successfully: %s", r.Summary())), nil
+}
+
+func setResumeHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	jsonData := request.GetString("json", "")
+
+	r, err := resume.Parse([]byte(jsonData))
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to parse resume: %v", err)), nil
+	}
+
+	if errors := r.Validate(); len(errors) > 0 {
+		return mcp.NewToolResultError(fmt.Sprintf("Resume validation errors: %v", errors)), nil
+	}
+
+	resumeMutex.Lock()
+	currentResume = r
+	resumeMutex.Unlock()
+
+	return mcp.NewToolResultText(fmt.Sprintf("Resume set successfully: %s", r.Summary())), nil
+}
+
+func getResumeHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	resumeMutex.RLock()
+	r := currentResume
+	resumeMutex.RUnlock()
+
+	if r == nil {
+		return mcp.NewToolResultError("No resume loaded. Use load_resume or set_resume first."), nil
+	}
+
+	jsonData, err := r.ToJSON()
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize resume: %v", err)), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonData)), nil
+}
+
+func matchJobsHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	resumeMutex.RLock()
+	r := currentResume
+	resumeMutex.RUnlock()
+
+	if r == nil {
+		return mcp.NewToolResultError("No resume loaded. Use load_resume or set_resume first."), nil
+	}
+
+	providersArg := request.GetString("providers", "")
+	limit := request.GetInt("limit", 20)
+	minScore := request.GetFloat("min_score", 0.1)
+
+	var selectedProviders []providers.Provider
+
+	if providersArg == "all" {
+		selectedProviders = providers.GetProviders()
+	} else {
+		names := strings.Split(providersArg, ",")
+		for _, name := range names {
+			name = strings.TrimSpace(name)
+			p := providers.ProviderFromName(name)
+			if p != nil {
+				selectedProviders = append(selectedProviders, p)
+			}
+		}
+	}
+
+	if len(selectedProviders) == 0 {
+		return mcp.NewToolResultError("No valid providers found"), nil
+	}
+
+	type MatchedJob struct {
+		Job   *providers.Job `json:"job"`
+		Score float64        `json:"match_score"`
+	}
+
+	var matchedJobs []MatchedJob
+
+	for _, p := range selectedProviders {
+		if len(matchedJobs) >= limit {
+			break
+		}
+
+		p.RetrieveJobs(func(job *providers.Job) {
+			if len(matchedJobs) >= limit {
+				return
+			}
+
+			score := r.MatchesJob(job.Title, job.Desc)
+			if score >= minScore {
+				matchedJobs = append(matchedJobs, MatchedJob{
+					Job:   job,
+					Score: score,
+				})
+			}
+		})
+	}
+
+	// Sort by score descending (simple bubble sort for small lists)
+	for i := 0; i < len(matchedJobs); i++ {
+		for j := i + 1; j < len(matchedJobs); j++ {
+			if matchedJobs[j].Score > matchedJobs[i].Score {
+				matchedJobs[i], matchedJobs[j] = matchedJobs[j], matchedJobs[i]
+			}
+		}
+	}
+
+	jsonResult, err := json.MarshalIndent(matchedJobs, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Found %d matching jobs:\n%s", len(matchedJobs), string(jsonResult))), nil
 }
