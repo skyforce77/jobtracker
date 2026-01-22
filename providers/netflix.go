@@ -2,7 +2,7 @@ package providers
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -100,7 +100,7 @@ func (netflix *netflix) readPage(url string, fn func(job *Job)) error {
 		return handleStatus(res)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (netflix *netflix) RetrieveJobs(fn func(job *Job)) error {
 		return handleStatus(res)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}

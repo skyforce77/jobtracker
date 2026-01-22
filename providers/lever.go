@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/k3a/html2text"
 	"github.com/pkg/errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -58,7 +58,7 @@ func (lever *lever) RetrieveJobs(fn func(job *Job)) error {
 		return errors.New("status code error:" + strconv.Itoa(res.StatusCode) + " " + res.Status)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}

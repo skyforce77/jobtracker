@@ -1,8 +1,9 @@
 package util
 
 import (
-	"../providers"
 	"container/list"
+
+	"github.com/skyforce77/jobtracker/providers"
 	"github.com/yuin/gopher-lua"
 	"layeh.com/gopher-luar"
 )

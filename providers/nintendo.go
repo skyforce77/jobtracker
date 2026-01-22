@@ -3,7 +3,7 @@ package providers
 import (
 	"encoding/json"
 	"github.com/k3a/html2text"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -38,7 +38,7 @@ func (nintendo *nintendo) RetrieveJobs(fn func(job *Job)) error {
 		return handleStatus(res)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}

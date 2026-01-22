@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"container/list"
 	"crypto/md5"
-	"github.com/hearkat/hearkat-go"
 	"reflect"
 )
 
@@ -341,15 +340,3 @@ func ProviderFromName(name string) Provider {
 	return nil
 }
 
-// ToHearkat converts the job
-func (job *Job) ToHearkat() *hearkat.Job {
-	return &hearkat.Job {
-		job.Title,
-		job.Company,
-		job.Location,
-		job.Type,
-		job.Desc,
-		job.Link,
-		job.Misc,
-	}
-}

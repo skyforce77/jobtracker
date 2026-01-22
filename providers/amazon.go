@@ -3,7 +3,7 @@ package providers
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 )
@@ -59,7 +59,7 @@ func (amazon *amazon) RetrieveJobs(fn func(job *Job)) error {
 			return handleStatus(res)
 		}
 
-		body, err := ioutil.ReadAll(res.Body)
+		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			return err
 		}

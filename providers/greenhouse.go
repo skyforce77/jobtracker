@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/k3a/html2text"
 	"html"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -51,7 +51,7 @@ func (greenhouse *greenhouse) RetrieveJob(job *Job, jobID int, fn func(job *Job)
 		return errors.New("status code error:" + strconv.Itoa(res.StatusCode) + " " + res.Status)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (greenhouse *greenhouse) RetrieveJobs(fn func(job *Job)) error {
 		return errors.New("status code error:" + strconv.Itoa(res.StatusCode) + " " + res.Status)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}

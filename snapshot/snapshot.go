@@ -5,11 +5,11 @@ import (
 	"compress/gzip"
 	"container/list"
 	"encoding/gob"
-	"io/ioutil"
+	"io"
 	"os"
 	"sync"
 
-	"../providers"
+	"github.com/skyforce77/jobtracker/providers"
 )
 
 // Snapshot helps you to collect and store your scrapped jobs
@@ -52,7 +52,7 @@ func NewSnapshot(fileName string) *Snapshot {
 	}
 	defer gz.Close()
 
-	data, err := ioutil.ReadAll(gz)
+	data, err := io.ReadAll(gz)
 	if err != nil {
 		return snapshot
 	}
@@ -110,7 +110,7 @@ func (snapshot *Snapshot) Save() error {
 		return err
 	}
 
-	err := ioutil.WriteFile(snapshot.file, gb.Bytes(), 0644)
+	err := os.WriteFile(snapshot.file, gb.Bytes(), 0644)
 	return err
 }
 

@@ -3,7 +3,7 @@ package providers
 import (
 	"encoding/json"
 	"github.com/k3a/html2text"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -260,7 +260,7 @@ func (mwj *myWorkdayJobs) readJobs(mwjp *myWorkdayJobsPage, i int, j int, fn fun
 			return handleStatus(res)
 		}
 
-		body, err := ioutil.ReadAll(res.Body)
+		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			return err
 		}
@@ -316,7 +316,7 @@ func (mwj *myWorkdayJobs) readPage(index int, mwjp *myWorkdayJobsPage, fn func(j
 						return handleStatus(res)
 					}
 
-					body, err := ioutil.ReadAll(res.Body)
+					body, err := io.ReadAll(res.Body)
 					if err != nil {
 						return err
 					}
@@ -354,7 +354,7 @@ func (mwj *myWorkdayJobs) RetrieveJobs(fn func(job *Job)) error {
 		return handleStatus(res)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
