@@ -22,35 +22,26 @@ const (
 )
 
 var (
-	// Active providers - tested and working as of 2025
-	//
-	// Ashby-based providers (growing ATS, simple public API)
 	providers = []Provider{
-		NewOpenAI(),  // ✓ 463 jobs
-		NewNotion(),  // ✓ 119 jobs
-		NewRamp(),    // ✓ 134 jobs
-		NewLinear(),  // ✓ 24 jobs
-		NewDeel(),    // ✓ 283 jobs
-
-		// Greenhouse-based providers (most reliable, large ecosystem)
-		NewGreenhouse(),  // Greenhouse's own jobs
-		NewAirbnb(),      // ✓ 230+ jobs
-		NewTwitch(),      // ✓ 58 jobs
-		NewTwilio(),      // ✓ 230 jobs
-		NewPinterest(),   // ✓ 500 jobs
-		NewMongoDB(),     // ✓ 5400+ jobs
-		NewInterCom(),    // ✓ 416 jobs
-		NewSquarespace(), // ✓ 116 jobs
-		NewFigma(),       // ✓ 175 jobs
-		NewStripe(),      // ✓ 550 jobs
-		NewDiscord(),     // ✓ 219 jobs
-		NewCoinbase(),    // ✓ 2070 jobs
-		NewAnthropic(),   // ✓ 692 jobs
-
-		// Custom API providers
-		NewNetflix(), // ✓ 603 jobs (Eightfold API)
-
-		// Other Greenhouse-based providers
+		NewOpenAI(),
+		NewNotion(),
+		NewRamp(),
+		NewLinear(),
+		NewDeel(),
+		NewGreenhouse(),
+		NewAirbnb(),
+		NewTwitch(),
+		NewTwilio(),
+		NewPinterest(),
+		NewMongoDB(),
+		NewInterCom(),
+		NewSquarespace(),
+		NewFigma(),
+		NewStripe(),
+		NewDiscord(),
+		NewCoinbase(),
+		NewAnthropic(),
+		NewNetflix(),
 		NewAdobe(),
 		NewAmazon(),
 		NewBlizzard(),
@@ -76,18 +67,9 @@ var (
 		NewMixpanel(),
 		NewRapid7(),
 		NewMalwarebytes(),
-
-		// Lever-based providers
-		NewLever(),   // Lever's own jobs
-		NewSpotify(), // ✓ 138 jobs
+		NewLever(),
+		NewSpotify(),
 	}
-
-	// Deprecated providers - kept for reference but not loaded
-	// NewCiviweb() - migrated to mon-vie-via.businessfrance.fr, requires auth
-	// NewGithub() - no longer on Greenhouse
-	// NewVimeo() - no longer on Greenhouse
-	// NewPatreon() - no longer on Greenhouse
-	// NewDoorDash() - migrated to different ATS
 )
 
 // Job is a standardized job offer
