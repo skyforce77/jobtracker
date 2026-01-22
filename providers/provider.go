@@ -116,6 +116,35 @@ type Provider interface {
 	RetrieveJobs(func(job *Job)) error
 }
 
+// ApplicationRequest contains the data needed to apply for a job
+type ApplicationRequest struct {
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Email        string `json:"email"`
+	Phone        string `json:"phone,omitempty"`
+	Resume       []byte `json:"resume,omitempty"`
+	ResumeURL    string `json:"resume_url,omitempty"`
+	CoverLetter  string `json:"cover_letter,omitempty"`
+	LinkedIn     string `json:"linkedin,omitempty"`
+	Website      string `json:"website,omitempty"`
+	Location     string `json:"location,omitempty"`
+	CustomFields map[string]string `json:"custom_fields,omitempty"`
+}
+
+// ApplicationResult contains the response from a job application
+type ApplicationResult struct {
+	Success       bool   `json:"success"`
+	ApplicationID string `json:"application_id,omitempty"`
+	Message       string `json:"message,omitempty"`
+	Error         string `json:"error,omitempty"`
+}
+
+// Applicant is an optional interface that providers can implement
+// to support automatic job applications
+type Applicant interface {
+	ApplyToJob(jobURL string, req *ApplicationRequest) (*ApplicationResult, error)
+}
+
 // Collect helps you recovering a list of jobs from a Provider
 func Collect(provider Provider) *list.List {
 	lst := list.New()

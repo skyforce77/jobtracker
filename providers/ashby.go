@@ -1,10 +1,13 @@
 package providers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
+	"regexp"
 )
 
 // Ashby provider for companies using Ashby ATS
@@ -91,6 +94,101 @@ func (a *ashby) RetrieveJobs(fn func(job *Job)) error {
 	}
 
 	return nil
+}
+
+func (a *ashby) ApplyToJob(jobURL string, req *ApplicationRequest) (*ApplicationResult, error) {
+	jobID, err := a.extractJobID(jobURL)
+	if err != nil {
+		return nil, err
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	writer.WriteField("jobPostingId", jobID)
+	writer.WriteField("firstName", req.FirstName)
+	writer.WriteField("lastName", req.LastName)
+	writer.WriteField("email", req.Email)
+
+	if req.Phone != "" {
+		writer.WriteField("phoneNumber", req.Phone)
+	}
+	if req.LinkedIn != "" {
+		writer.WriteField("linkedInUrl", req.LinkedIn)
+	}
+	if req.Website != "" {
+		writer.WriteField("websiteUrl", req.Website)
+	}
+	if req.Location != "" {
+		writer.WriteField("currentLocation", req.Location)
+	}
+
+	if len(req.Resume) > 0 {
+		part, err := writer.CreateFormFile("resume", "resume.pdf")
+		if err != nil {
+			return nil, fmt.Errorf("failed to create resume form field: %w", err)
+		}
+		part.Write(req.Resume)
+	}
+
+	for key, value := range req.CustomFields {
+		writer.WriteField(key, value)
+	}
+
+	writer.Close()
+
+	url := fmt.Sprintf("https://api.ashbyhq.com/posting-api/job-board/%s/application", a.slug)
+	httpReq, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	httpReq.Header.Set("Content-Type", writer.FormDataContentType())
+	httpReq.Header.Set("User-Agent", "Mozilla/5.0 (compatible; JobTracker/1.0)")
+
+	client := &http.Client{}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode >= 400 {
+		return &ApplicationResult{
+			Success: false,
+			Error:   fmt.Sprintf("HTTP %d: %s", resp.StatusCode, string(respBody)),
+		}, nil
+	}
+
+	var result struct {
+		ApplicationID string `json:"applicationId"`
+		Success       bool   `json:"success"`
+		Message       string `json:"message"`
+	}
+	json.Unmarshal(respBody, &result)
+
+	return &ApplicationResult{
+		Success:       result.Success || resp.StatusCode < 300,
+		ApplicationID: result.ApplicationID,
+		Message:       result.Message,
+	}, nil
+}
+
+func (a *ashby) extractJobID(jobURL string) (string, error) {
+	patterns := []*regexp.Regexp{
+		regexp.MustCompile(`/([a-f0-9-]{36})(?:\?|$)`),
+		regexp.MustCompile(`jobs\.ashbyhq\.com/[^/]+/([a-f0-9-]+)`),
+	}
+
+	for _, pattern := range patterns {
+		if matches := pattern.FindStringSubmatch(jobURL); len(matches) > 1 {
+			return matches[1], nil
+		}
+	}
+
+	return "", fmt.Errorf("could not extract job ID from URL: %s", jobURL)
 }
 
 // Specific Ashby-based company types

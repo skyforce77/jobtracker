@@ -109,6 +109,20 @@ func main() {
 
 	s.AddTool(matchJobsTool, matchJobsHandler)
 
+	// Tool: apply_to_job
+	applyToJobTool := mcp.NewTool("apply_to_job",
+		mcp.WithDescription("Apply to a job using the loaded resume. Supports Greenhouse, Ashby, and Lever job boards."),
+		mcp.WithString("job_url",
+			mcp.Required(),
+			mcp.Description("The URL of the job to apply to"),
+		),
+		mcp.WithString("cover_letter",
+			mcp.Description("Optional cover letter text"),
+		),
+	)
+
+	s.AddTool(applyToJobTool, applyToJobHandler)
+
 	// Start the server
 	if err := server.ServeStdio(s); err != nil {
 		fmt.Printf("Server error: %v\n", err)
@@ -367,4 +381,102 @@ func matchJobsHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Found %d matching jobs:\n%s", len(matchedJobs), string(jsonResult))), nil
+}
+
+func applyToJobHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	resumeMutex.RLock()
+	r := currentResume
+	resumeMutex.RUnlock()
+
+	if r == nil {
+		return mcp.NewToolResultError("No resume loaded. Use load_resume or set_resume first."), nil
+	}
+
+	if r.Basics == nil {
+		return mcp.NewToolResultError("Resume has no basics section with contact info."), nil
+	}
+
+	jobURL := request.GetString("job_url", "")
+	coverLetter := request.GetString("cover_letter", "")
+
+	if jobURL == "" {
+		return mcp.NewToolResultError("job_url is required"), nil
+	}
+
+	applicant := findApplicantForURL(jobURL)
+	if applicant == nil {
+		return mcp.NewToolResultError("Could not find a supported provider for this job URL. Supported: Greenhouse, Ashby, Lever"), nil
+	}
+
+	nameParts := strings.SplitN(r.Basics.Name, " ", 2)
+	firstName := nameParts[0]
+	lastName := ""
+	if len(nameParts) > 1 {
+		lastName = nameParts[1]
+	}
+
+	var linkedIn, website string
+	for _, profile := range r.Basics.Profiles {
+		network := strings.ToLower(profile.Network)
+		if network == "linkedin" {
+			linkedIn = profile.URL
+		} else if website == "" && profile.URL != "" {
+			website = profile.URL
+		}
+	}
+	if website == "" && r.Basics.URL != "" {
+		website = r.Basics.URL
+	}
+
+	var location string
+	if r.Basics.Location != nil {
+		parts := []string{}
+		if r.Basics.Location.City != "" {
+			parts = append(parts, r.Basics.Location.City)
+		}
+		if r.Basics.Location.Region != "" {
+			parts = append(parts, r.Basics.Location.Region)
+		}
+		if r.Basics.Location.CountryCode != "" {
+			parts = append(parts, r.Basics.Location.CountryCode)
+		}
+		location = strings.Join(parts, ", ")
+	}
+
+	appReq := &providers.ApplicationRequest{
+		FirstName:   firstName,
+		LastName:    lastName,
+		Email:       r.Basics.Email,
+		Phone:       r.Basics.Phone,
+		LinkedIn:    linkedIn,
+		Website:     website,
+		Location:    location,
+		CoverLetter: coverLetter,
+	}
+
+	result, err := applicant.ApplyToJob(jobURL, appReq)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Application failed: %v", err)), nil
+	}
+
+	jsonResult, _ := json.MarshalIndent(result, "", "  ")
+	return mcp.NewToolResultText(string(jsonResult)), nil
+}
+
+func findApplicantForURL(jobURL string) providers.Applicant {
+	jobURL = strings.ToLower(jobURL)
+
+	patterns := map[string]func() providers.Applicant{
+		"greenhouse.io":   func() providers.Applicant { p := providers.NewGreenhouse(); return p.(providers.Applicant) },
+		"jobs.ashbyhq.com": func() providers.Applicant { p := providers.NewOpenAI(); return p.(providers.Applicant) },
+		"jobs.lever.co":   func() providers.Applicant { p := providers.NewLever(); return p.(providers.Applicant) },
+	}
+
+	for pattern, factory := range patterns {
+		if strings.Contains(jobURL, pattern) {
+			return factory()
+		}
+	}
+
+	return nil
 }
