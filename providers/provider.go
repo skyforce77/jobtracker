@@ -23,19 +23,34 @@ const (
 
 var (
 	// Active providers - tested and working as of 2025
-	// Providers using Greenhouse API (most reliable)
+	//
+	// Ashby-based providers (growing ATS, simple public API)
 	providers = []Provider{
-		NewGreenhouse(),  // Greenhouse's own jobs
-		NewAirbnb(),      // ✓ Working
-		NewTwitch(),      // ✓ Working
-		NewTwilio(),      // ✓ Working
-		NewPinterest(),   // ✓ Working
-		NewMongoDB(),     // ✓ Working
-		NewInterCom(),    // ✓ Working
-		NewSquarespace(), // ✓ Working
-		NewNetflix(),     // ✓ Working (custom API)
+		NewOpenAI(),  // ✓ 463 jobs
+		NewNotion(),  // ✓ 119 jobs
+		NewRamp(),    // ✓ 134 jobs
+		NewLinear(),  // ✓ 24 jobs
+		NewDeel(),    // ✓ 283 jobs
 
-		// Other Greenhouse-based providers (may need verification)
+		// Greenhouse-based providers (most reliable, large ecosystem)
+		NewGreenhouse(),  // Greenhouse's own jobs
+		NewAirbnb(),      // ✓ 230+ jobs
+		NewTwitch(),      // ✓ 58 jobs
+		NewTwilio(),      // ✓ 230 jobs
+		NewPinterest(),   // ✓ 500 jobs
+		NewMongoDB(),     // ✓ 5400+ jobs
+		NewInterCom(),    // ✓ 416 jobs
+		NewSquarespace(), // ✓ 116 jobs
+		NewFigma(),       // ✓ 175 jobs
+		NewStripe(),      // ✓ 550 jobs
+		NewDiscord(),     // ✓ 219 jobs
+		NewCoinbase(),    // ✓ 2070 jobs
+		NewAnthropic(),   // ✓ 692 jobs
+
+		// Custom API providers
+		NewNetflix(), // ✓ 603 jobs (Eightfold API)
+
+		// Other Greenhouse-based providers
 		NewAdobe(),
 		NewAmazon(),
 		NewBlizzard(),
@@ -62,8 +77,9 @@ var (
 		NewRapid7(),
 		NewMalwarebytes(),
 
-		// Lever-based providers (many companies have migrated away)
-		NewLever(), // Lever's own jobs
+		// Lever-based providers
+		NewLever(),   // Lever's own jobs
+		NewSpotify(), // ✓ 138 jobs
 	}
 
 	// Deprecated providers - kept for reference but not loaded
