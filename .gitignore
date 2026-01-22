@@ -24,4 +24,12 @@ _testmain.go
 *.prof
 
 *.idea/
+.vscode/
+.DS_Store
+
+# Binaries
 jobtracker
+jobtracker-mcp
+
+# Snapshots
+*.snap
